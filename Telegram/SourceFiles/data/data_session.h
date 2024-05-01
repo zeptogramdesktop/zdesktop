@@ -50,10 +50,8 @@ namespace Data {
 class Folder;
 class LocationPoint;
 class WallPaper;
-class ScheduledMessages;
 class ShortcutMessages;
 class SendActionManager;
-class SponsoredMessages;
 class Reactions;
 class EmojiStatuses;
 class ForumIcons;
@@ -107,9 +105,6 @@ public:
 	[[nodiscard]] ChatFilters &chatsFilters() const {
 		return *_chatsFilters;
 	}
-	[[nodiscard]] ScheduledMessages &scheduledMessages() const {
-		return *_scheduledMessages;
-	}
 	[[nodiscard]] ShortcutMessages &shortcutMessages() const {
 		return *_shortcutMessages;
 	}
@@ -130,9 +125,6 @@ public:
 	}
 	[[nodiscard]] Stickers &stickers() const {
 		return *_stickers;
-	}
-	[[nodiscard]] SponsoredMessages &sponsoredMessages() const {
-		return *_sponsoredMessages;
 	}
 	[[nodiscard]] Reactions &reactions() const {
 		return *_reactions;
@@ -1090,9 +1082,7 @@ private:
 	const std::unique_ptr<SavedMessages> _savedMessages;
 	const std::unique_ptr<Chatbots> _chatbots;
 	const std::unique_ptr<BusinessInfo> _businessInfo;
-	std::unique_ptr<ScheduledMessages> _scheduledMessages;
 	std::unique_ptr<ShortcutMessages> _shortcutMessages;
-	std::unique_ptr<SponsoredMessages> _sponsoredMessages;
 
 	MsgId _nonHistoryEntryId = ShortcutMaxMsgId;
 

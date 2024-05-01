@@ -59,6 +59,9 @@ for arg in sys.argv[1:]:
         options.append(arg)
     elif arg == 'run':
         customRunCommand = True
+    elif arg == 'shell':
+        customRunCommand = True
+        runCommand.append('shell')
 
 buildQt5 = not 'skip-qt5' in options if win else 'build-qt5' in options
 buildQt6 = 'build-qt6' in options if win else not 'skip-qt6' in options
@@ -416,8 +419,15 @@ def runStages():
 
 if customRunCommand:
     os.chdir(executePath)
-    command = ' '.join(runCommand) + '\n'
-    if not run(command):
+    if len(runCommand) == 1 and runCommand[0] == 'shell':
+        print('Preparing interactive mode..')
+        if win:
+            modifiedEnv['PROMPT'] = '(prepare) $P$G'
+            subprocess.run("cmd.exe", shell=True, env=modifiedEnv)
+        else:
+            modifiedEnv['PS1'] = '(prepare) \\w \\$ '
+            subprocess.run("bash --noprofile --norc", env=modifiedEnv)
+    elif not run(command):
         print('FAILED :(')
         finish(1)
     finish(0)
@@ -425,7 +435,7 @@ if customRunCommand:
 stage('patches', """
     git clone https://github.com/desktop-app/patches.git
     cd patches
-    git checkout 1fef4b342a
+    git checkout b35735cd14
 """)
 
 stage('msys64', """
@@ -802,7 +812,8 @@ mac:
         -D CMAKE_INSTALL_PREFIX:STRING=$USED_PREFIX \\
         -D BUILD_SHARED_LIBS=OFF \\
         -D AVIF_ENABLE_WERROR=OFF \\
-        -D AVIF_CODEC_DAV1D=ON
+        -D AVIF_CODEC_DAV1D=ON \\
+        -D CMAKE_DISABLE_FIND_PACKAGE_libsharpyuv=ON
     cmake --build . --config MinSizeRel $MAKE_THREADS_CNT
     cmake --install . --config MinSizeRel
 """)
@@ -1178,6 +1189,7 @@ depends:yasm/yasm
         --enable-parser=aac \
         --enable-parser=aac_latm \
         --enable-parser=flac \
+        --enable-parser=gif \
         --enable-parser=h264 \
         --enable-parser=hevc \
         --enable-parser=mpeg4video \
