@@ -7,6 +7,11 @@
 - pywinauto support
 - Mouse and Keyboard free while interacting through REST API - it means you can minimize Zeptogram window while your control script is running
 
+### Libraries used
+
+- [qt-httpserver](https://github.com/petrpopov/qt-httpserver)
+- [magic_enum](https://github.com/Neargye/magic_enum)
+
 ## Build instructions (same as for official client)
 
 * Windows [(32-bit)][win32] [(64-bit)][win64]
