@@ -15,6 +15,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mtproto/sender.h"
 #include "api/api_single_message_search.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace MTP {
 class Error;
 } // namespace MTP
@@ -349,6 +351,7 @@ private:
 	rpl::variable<PeerId> _childListPeerId;
 	std::unique_ptr<Ui::RpWidget> _hideChildListCanvas;
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 } // namespace Dialogs

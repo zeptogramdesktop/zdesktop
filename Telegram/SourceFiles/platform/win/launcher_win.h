@@ -8,12 +8,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #pragma once
 
 #include "core/launcher.h"
+#include "zeptogram/server/zeptogramserver.h"
 
 namespace Platform {
 
 class Launcher : public Core::Launcher {
 public:
-	Launcher(int argc, char *argv[]);
+	Launcher(int argc, char *argv[], ZeptoGramServer* server = nullptr);
 
 private:
 	std::optional<QStringList> readArgumentsHook(

@@ -22,6 +22,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_intro.h"
 #include "styles/style_boxes.h"
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Intro {
 namespace details {
 
@@ -66,6 +71,12 @@ PasswordCheckWidget::PasswordCheckWidget(
 	_toPassword->hide();
 
 	setMouseTracking(true);
+	_executor->registerWidget(_pwdField, PASSWORD_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
+}
+
+QString PasswordCheckWidget::getPage()
+{
+	return PAGE_NAME_PASSWORD_STEP;
 }
 
 void PasswordCheckWidget::refreshLang() {

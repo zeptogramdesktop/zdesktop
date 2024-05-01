@@ -75,6 +75,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_window.h"
 #include "styles/style_menu_icons.h"
 
+#include <QDebug>
+
 namespace Dialogs {
 namespace {
 
@@ -336,6 +338,123 @@ InnerWidget::InnerWidget(
 	refreshWithCollapsedRows(true);
 
 	setupShortcuts();
+}
+
+std::pair<QPoint, PeerId> InnerWidget::getPointForChatWithUsername(const QString& username) const
+{
+	if (username.isNull() || username.isEmpty())
+	{
+		qDebug() << "ZPT: Cannot search for empty username";
+		return std::make_pair(QPoint(-1, -1), PeerId(-1));
+	}
+
+	const int X = 30;
+
+	RowDescriptor rd = chatListEntryFirst();
+	if (!rd.key)
+	{
+		qDebug() << "ZPT: No any chats";
+		return std::make_pair(QPoint(-1, -1), PeerId(-1));
+	}
+
+	auto peer = rd.key.peer();
+	PeerId peerId = peer->id;
+	qDebug() << "ZPT: Found peerId: " << peerId.value << " for first chat with username: " << peer->username();
+
+	/*uint64 id = peerId.value;
+	PeerId newPeerIdForTest(id);*/
+
+	QString pUsername = rd.key.peer()->username().simplified().trimmed();
+	QString fUsername = username.simplified().trimmed();
+	if (pUsername == fUsername)
+	{
+		qDebug() << "ZPT: Found exact row for username: " << fUsername;
+		const auto dialog = _shownList->getRow(rd.key);
+		
+		int top = dialog->top();
+		int y = top + (double)dialog->height() / 2;
+		return std::make_pair(QPoint(X, y), peerId);
+	}
+
+	while (true)
+	{
+		rd = chatListEntryAfter(rd);
+		if (!rd.key)
+		{
+			qDebug() << "ZPT: Found last row, exiting";
+			break;
+		}
+
+		peer = rd.key.peer();
+		peerId = peer->id;
+
+		pUsername = rd.key.peer()->username().simplified().trimmed();
+		if (pUsername == fUsername)
+		{
+			qDebug() << "ZPT: Found exact row for username: " << fUsername;
+			const auto dialog = _shownList->getRow(rd.key);
+
+			int top = dialog->top();
+			int y = top + (double)dialog->height() / 2;
+			return std::make_pair(QPoint(X, y), peerId);
+		}
+	}
+	return std::make_pair(QPoint(-1, -1), PeerId(-1));
+}
+
+std::pair<QPoint, PeerId> InnerWidget::getPointForChatWithPeerId(const uint64& peerId) const
+{
+	if (peerId < 0)
+	{
+		qDebug() << "ZPT: Cannot search for incorrect peerId";
+		return std::make_pair(QPoint(-1, -1), PeerId(-1));
+	}
+
+	const int X = 30;
+
+	RowDescriptor first = chatListEntryFirst();
+	if (!first.key)
+	{
+		qDebug() << "ZPT: No any chats";
+		return std::make_pair(QPoint(-1, -1), PeerId(-1));
+	}
+
+	auto peer = first.key.peer();
+	PeerId chatPeerId = peer->id;
+	qDebug() << "ZPT: Found peerId: " << chatPeerId.value << " for first chat with username: " << peer->username();
+
+	if (chatPeerId.value == peerId)
+	{
+		qDebug() << "ZPT: Found exact row for peerId: " << peerId;
+		const auto dialog = _shownList->getRow(first.key);
+
+		int top = dialog->top();
+		int y = top + (double)dialog->height() / 2;
+		return std::make_pair(QPoint(X, y), chatPeerId);
+	}
+
+	while (true)
+	{
+		RowDescriptor rd = chatListEntryAfter(first);
+		if (!rd.key)
+		{
+			qDebug() << "ZPT: Found last row, exiting";
+			break;
+		}
+
+		peer = rd.key.peer();
+		chatPeerId = peer->id;
+		if (chatPeerId.value == peerId)
+		{
+			qDebug() << "ZPT: Found exact row for peerId: " << peerId;
+			const auto dialog = _shownList->getRow(rd.key);
+
+			int top = dialog->top();
+			int y = top + (double)dialog->height() / 2;
+			return std::make_pair(QPoint(X, y), chatPeerId);
+		}
+	}
+	return std::make_pair(QPoint(-1, -1), PeerId(-1));
 }
 
 bool InnerWidget::updateEntryHeight(not_null<Entry*> entry) {
@@ -655,6 +774,7 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 		context.topicJumpSelected = selected
 			&& _selectedTopicJump
 			&& (!_pressed || _pressedTopicJump);
+
 		Ui::RowPainter::Paint(p, row, validateVideoUserpic(row), context);
 	};
 	if (_state == WidgetState::Default) {
@@ -1088,6 +1208,12 @@ void InnerWidget::paintPeerSearchResult(
 	QRect tr(context.st->textLeft, context.st->textTop, namewidth, st::dialogsTextFont->height);
 	p.setFont(st::dialogsTextFont);
 	QString username = peer->username();
+
+	/*
+	qDebug() << "ZPT: Rendering peerSearch username: " << username;
+	*/
+	
+
 	if (!context.active && username.startsWith(_peerSearchQuery, Qt::CaseInsensitive)) {
 		auto first = '@' + username.mid(0, _peerSearchQuery.size());
 		auto second = username.mid(_peerSearchQuery.size());

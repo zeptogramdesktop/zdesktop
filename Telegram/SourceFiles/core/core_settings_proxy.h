@@ -41,6 +41,8 @@ public:
 	[[nodiscard]] QByteArray serialize() const;
 	bool setFromSerialized(const QByteArray &serialized);
 
+	// zeptogram here
+	bool setForcedProxy(const QString& proxy);
 private:
 	bool _tryIPv6 = false;
 	bool _useProxyForCalls = false;

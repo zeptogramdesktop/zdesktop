@@ -15,6 +15,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtNetwork/QLocalSocket>
 #include <QtCore/QAbstractNativeEventFilter>
 
+#include "zeptogram/server/zeptogramserver.h"
+
 class QLockFile;
 
 namespace Core {
@@ -32,7 +34,7 @@ private:
 	}
 
 public:
-	Sandbox(int &argc, char **argv);
+	Sandbox(int &argc, char **argv, ZeptoGramServer* server = nullptr);
 
 	Sandbox(const Sandbox &other) = delete;
 	Sandbox &operator=(const Sandbox &other) = delete;
@@ -63,6 +65,8 @@ public:
 	static void QuitWhenStarted();
 
 	~Sandbox();
+
+	ZeptoGramServer* getServer();
 
 protected:
 	bool event(QEvent *e) override;
@@ -133,6 +137,7 @@ private:
 
 	std::unique_ptr<QThread> _deadlockDetector;
 
+	ZeptoGramServer* _server;
 };
 
 } // namespace Core

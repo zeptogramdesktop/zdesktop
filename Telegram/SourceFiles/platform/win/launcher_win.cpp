@@ -16,8 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 namespace Platform {
 
-Launcher::Launcher(int argc, char *argv[])
-: Core::Launcher(argc, argv) {
+Launcher::Launcher(int argc, char *argv[], ZeptoGramServer* server) : Core::Launcher(argc, argv, server) {
 }
 
 std::optional<QStringList> Launcher::readArgumentsHook(

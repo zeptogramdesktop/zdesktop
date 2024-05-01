@@ -22,6 +22,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_layers.h"
 #include "styles/style_settings.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 /*
 Available actions for follow states.
 
@@ -94,6 +100,9 @@ void Email::setupContent() {
 		error->hide();
 	}, newInput->lifetime());
 	AddSkipInsteadOfField(content);
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(newInput, TWO_STEP_CREATE_PASSWORD_RECOVERY_EMAIL_INPUT, WIDGET_TYPE::INPUT_FIELD);
 
 	const auto send = [=](Fn<void()> close) {
 		Expects(!_requestLifetime);
@@ -187,6 +196,10 @@ void Email::setupContent() {
 			confirm(newText);
 		}
 	});
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(skip, TWO_STEP_CREATE_PASSWORD_RECOVERY_EMAIL_SKIP_BUTON, WIDGET_TYPE::BUTTON);
+	ZeptoGramExecutor::instance()->registerWidget(button, TWO_STEP_CREATE_PASSWORD_RECOVERY_EMAIL_SAVE_AND_FINISH_BUTON, WIDGET_TYPE::BUTTON);
 
 	const auto submit = [=] { button->clicked({}, Qt::LeftButton); };
 	newInput->submits() | rpl::start_with_next(submit, newInput->lifetime());

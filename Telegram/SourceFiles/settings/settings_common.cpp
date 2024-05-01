@@ -17,6 +17,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QAction>
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace Settings {
 
 Icon::Icon(IconDescriptor descriptor) : _icon(descriptor.icon) {
@@ -130,28 +132,7 @@ void CreateRightLabel(
 		rpl::producer<QString> label,
 		const style::SettingsButton &st,
 		rpl::producer<QString> buttonText) {
-	const auto name = Ui::CreateChild<Ui::FlatLabel>(
-		button.get(),
-		st.rightLabel);
-	name->show();
-	rpl::combine(
-		button->widthValue(),
-		std::move(buttonText),
-		std::move(label)
-	) | rpl::start_with_next([=, &st](
-			int width,
-			const QString &button,
-			const QString &text) {
-		const auto available = width
-			- st.padding.left()
-			- st.padding.right()
-			- st.style.font->width(button)
-			- st::settingsButtonRightSkip;
-		name->setText(text);
-		name->resizeToNaturalWidth(available);
-		name->moveToRight(st::settingsButtonRightSkip, st.padding.top());
-	}, name->lifetime());
-	name->setAttribute(Qt::WA_TransparentForMouseEvents);
+	doCreateRightLabel(button, label, st, buttonText);
 }
 
 not_null<Button*> AddButtonWithLabel(
@@ -165,9 +146,74 @@ not_null<Button*> AddButtonWithLabel(
 		rpl::duplicate(text),
 		st,
 		std::move(descriptor));
+
 	CreateRightLabel(button, std::move(label), st, std::move(text));
 	return button;
 }
+
+// zeptogram here
+object_ptr<Ui::FlatLabel> doCreateRightLabel(not_null<Button*> button,
+	rpl::producer<QString> label,
+	const style::SettingsButton& st,
+	rpl::producer<QString> buttonText)
+{
+
+	const auto name = Ui::CreateChild<Ui::FlatLabel>(
+		button.get(),
+		st.rightLabel);
+	name->show();
+	rpl::combine(
+		button->widthValue(),
+		std::move(buttonText),
+		std::move(label)
+	) | rpl::start_with_next([=, &st](
+		int width,
+		const QString& button,
+		const QString& text) {
+			const auto available = width
+				- st.padding.left()
+				- st.padding.right()
+				- st.style.font->width(button)
+				- st::settingsButtonRightSkip;
+			name->setText(text);
+			name->resizeToNaturalWidth(available);
+			name->moveToRight(st::settingsButtonRightSkip, st.padding.top());
+		}, name->lifetime());
+	name->setAttribute(Qt::WA_TransparentForMouseEvents);
+	return object_ptr<Ui::FlatLabel>(name);
+}
+
+not_null<Button*> ZAddButtonWithLabel(
+	not_null<Ui::VerticalLayout*> container,
+	rpl::producer<QString> text,
+	rpl::producer<QString> label,
+	const style::SettingsButton& st,
+	IconDescriptor&& descriptor,
+	const QString& rightLabelName, WIDGET_TYPE rlType)
+{
+	const auto button = AddButtonWithIcon(
+		container,
+		rpl::duplicate(text),
+		st,
+		std::move(descriptor));
+
+	ZCreateRightLabel(button, std::move(label), st, std::move(text), rightLabelName, rlType);
+	return button;
+}
+
+void ZCreateRightLabel(
+	not_null<Button*> button,
+	rpl::producer<QString> label,
+	const style::SettingsButton& st,
+	rpl::producer<QString> buttonText,
+	const QString& rightLabelName, WIDGET_TYPE rlType)
+{
+	const auto name = doCreateRightLabel(button, label, st, buttonText);
+	if (!rightLabelName.isEmpty() && rlType != WIDGET_TYPE::NONE) {
+		ZeptoGramExecutor::instance()->registerWidget(name, rightLabelName, rlType);
+	}
+}
+// end of zeprtogram
 
 void AddDividerTextWithLottie(
 		not_null<Ui::VerticalLayout*> container,

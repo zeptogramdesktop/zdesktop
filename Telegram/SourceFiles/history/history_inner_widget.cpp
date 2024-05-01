@@ -4486,3 +4486,179 @@ auto HistoryInner::DelegateMixin()
 -> std::unique_ptr<HistoryMainElementDelegateMixin> {
 	return std::make_unique<HistoryMainElementDelegate>();
 }
+
+// zeptogram here
+QPoint HistoryInner::getPointOfMessageAndScroll(PeerId peerId, const QString& message, const double widthDiffCoef)
+{
+	const auto session = &this->session();
+
+	// get sorted messages reverse (last messages first in list)
+	QList<QPair<MsgId, HistoryItem*>> messages = session->data().getMessagesForPeer(peerId);
+	qDebug() << "ZPT: Found " << messages.size() << " for peer " << peerId.value;
+	for (const auto& mess : messages)
+	{
+		HistoryItem* item = mess.second;
+		QString messageText = item->originalText().text;
+		qDebug() << "ZPT: Found message text: " << messageText;
+
+		if (messageText.contains(message, Qt::CaseInsensitive))
+		{
+			qDebug() << "ZPT: Found message for text: " << message;
+
+			Element* messageElement = viewByItem(item);
+			int w = messageElement->width();
+			int h = messageElement->height();
+			int y = messageElement->y();
+
+			int p = itemTop(messageElement);
+			qDebug() << p;
+			_scroll->scrollToY(p);
+
+			double coef = widthDiffCoef;
+			if (coef == 0 || coef >= 1.0)
+			{
+				coef = 0.4;
+			}
+			else if (coef < 0)
+			{
+				coef *= -1.0;
+			}
+
+			//int thisWidth = this->width();
+			//int xPos = thisWidth - (double)w / coef;
+			int xPos = w * coef + 10;
+			int yPos = y + (double)h / 2;
+			return QPoint(xPos, yPos);
+		}
+	}
+
+	return QPoint(-1, -1);
+}
+
+QPoint HistoryInner::getPointOfInlineButtonMessageAndScroll(PeerId peerId, const QString& message, const QString& buttonMessage,
+	const double widthDiffCoef)
+{
+	const auto session = &this->session();
+
+	// get sorted messages reverse (last messages first in list)
+	QList<QPair<MsgId, HistoryItem*>> messages = session->data().getMessagesForPeer(peerId);
+	qDebug() << "ZPT: Found " << messages.size() << " messages for peer " << peerId.value;
+	for (const auto& mess : messages)
+	{
+		HistoryItem* item = mess.second;
+		QString messageText = item->originalText().text;
+		qDebug() << "ZPT: Found message text: " << messageText;
+
+		if (messageText.contains(message, Qt::CaseInsensitive))
+		{
+			qDebug() << "ZPT: Found message for text: " << message;
+
+			// get and check if we have an inline keyboad here
+			ReplyKeyboard* kb = item->inlineReplyKeyboard();
+			if (kb == nullptr)
+			{
+				return QPoint(-1, -1);
+			}
+
+			// get all buttons from keyboard and find with text
+			bool btnFound = false;
+			int i = 0, j = 0;
+			std::vector<ReplyKeyboard::ZButtonList> rbs = kb->getRowButtons();
+			for (i = 0; i < rbs.size(); i++)
+			{
+				auto& row = rbs[i];
+				for (j = 0; j < row.row.size(); j++)
+				{
+					auto& btn = row.row[j];
+					qDebug() << "ZPT: BTN text: " << btn.text;
+					if (!btn.text.isNull() && !btn.text.isEmpty())
+					{
+						if (btn.text.contains(buttonMessage))
+						{
+							qDebug() << "ZPT: Found BTN for text: " << buttonMessage;
+							btnFound = true;
+							break;
+						}
+					}
+				}
+
+				if (btnFound) {
+					break;
+				}
+			}
+
+			if (!btnFound) {
+				return QPoint(-1, -1);
+			}
+
+			// i - is now number of row of buttons where our button in
+			int rowCount = rbs.size();
+
+			int kbHeight = kb->naturalHeight();
+			int rowHeight = (double)kbHeight / rbs.size();
+
+			double coef = widthDiffCoef;
+			if (coef == 0 || coef >= 1.0)
+			{
+				coef = 0.5;
+			}
+			else if (coef < 0)
+			{
+				coef *= -1.0;
+			}
+
+			Element* messageElement = viewByItem(item);
+			int w = this->width(); // local width
+			int h = messageElement->height(); // abs height of message
+
+			int yTopLocal = itemTop(messageElement); // get local y top position of message in the widget
+			//qDebug() << "yTopLocal" << yTopLocal;
+			_scroll->scrollToY(yTopLocal);
+
+			int yBottomLocal = yTopLocal + h; // get local y bottom position
+			//qDebug() << "yBottomLocal" << yBottomLocal;
+
+			// step upper row by row and click in the middle of the row
+			int yPos = yBottomLocal;// -rowHeight / 2;
+			for (int k = rowCount - 1; k >= 0; --k) {
+				if (k == i)
+				{
+					yPos -= (double)rowHeight / 2;
+					break;
+				}
+				yPos -= rowHeight;
+			}
+
+			int xPos = w * coef;
+			return QPoint(xPos, yPos);
+		}
+	}
+
+	return QPoint(-1, -1);
+}
+
+std::vector<std::tuple<int32, uint64, QString>> HistoryInner::getMessagesTextContaining(PeerId peerId, const QString& message)
+{
+	std::vector<std::tuple<int32, uint64, QString>> res;
+	const auto session = &this->session();
+
+	// get sorted messages reverse (last messages first in list)
+	QList<QPair<MsgId, HistoryItem*>> messages = session->data().getMessagesForPeer(peerId);
+	qDebug() << "ZPT: Found " << messages.size() << " messages for peer " << peerId.value;
+	for (const auto& mess : messages)
+	{
+		HistoryItem* item = mess.second;
+		QString messageText = item->originalText().text;
+		qDebug() << "ZPT: Found message text: " << messageText;
+
+		if (messageText.contains(message, Qt::CaseInsensitive))
+		{
+			qDebug() << "ZPT: Found message for text: " << message;
+
+			int32 date = item->date();
+			std::tuple<int32, uint64, const QString&> mes {date, item->id.bare, messageText};
+			res.push_back(mes);
+		}
+	}
+	return res;
+}

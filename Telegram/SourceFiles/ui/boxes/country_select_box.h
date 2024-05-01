@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "ui/layers/box_content.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace Countries {
 struct Info;
 } // namespace Countries
@@ -54,6 +56,7 @@ private:
 	object_ptr<Inner> _ownedInner;
 	QPointer<Inner> _inner;
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 } // namespace Ui

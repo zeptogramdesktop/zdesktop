@@ -218,6 +218,12 @@ public:
 	[[nodiscard]] static auto DelegateMixin()
 	-> std::unique_ptr<HistoryMainElementDelegateMixin>;
 
+	// zeptogram here
+
+	QPoint getPointOfMessageAndScroll(PeerId peerId, const QString& message, const double widthDiffCoef = 0.2);
+	QPoint getPointOfInlineButtonMessageAndScroll(PeerId peerId, const QString& message, const QString& buttonMessage, const double widthDiffCoef = 0.5);
+	std::vector<std::tuple<int32, uint64, QString>> getMessagesTextContaining(PeerId peerId, const QString& message);
+
 protected:
 	bool focusNextPrevChild(bool next) override;
 

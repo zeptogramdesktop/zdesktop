@@ -11,6 +11,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/buttons.h"
 #include "styles/style_layers.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Ui {
 
 void ConfirmBox(not_null<Ui::GenericBox*> box, ConfirmBoxArgs &&args) {
@@ -29,11 +35,15 @@ void ConfirmBox(not_null<Ui::GenericBox*> box, ConfirmBoxArgs &&args) {
 			: withTitle
 			? QMargins(padding.left(), 0, padding.right(), padding.bottom())
 			: padding;
-		const auto label = box->addRow(
-			object_ptr<Ui::FlatLabel>(
-				box.get(),
-				v::text::take_marked(std::move(args.text)),
-				args.labelStyle ? *args.labelStyle : st::boxLabel),
+
+		// reg here
+		object_ptr<Ui::FlatLabel> confirmBoxLabel = object_ptr<Ui::FlatLabel>(
+			box.get(),
+			v::text::take_marked(std::move(args.text)),
+			args.labelStyle ? *args.labelStyle : st::boxLabel);
+		ZeptoGramExecutor::instance()->registerWidget(confirmBoxLabel, CONFIRM_BOX_LABEL, WIDGET_TYPE::LABEL);
+
+		const auto label = box->addRow(std::move(confirmBoxLabel),
 			use);
 		if (args.labelFilter) {
 			label->setClickHandlerFilter(std::move(args.labelFilter));
@@ -65,6 +75,10 @@ void ConfirmBox(not_null<Ui::GenericBox*> box, ConfirmBoxArgs &&args) {
 			c();
 		},
 		args.confirmStyle ? *args.confirmStyle : defaultButtonStyle);
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(confirmButton, CONFIRM_BOX_CONFIRM_BUTTON, WIDGET_TYPE::BUTTON);
+
 	box->events(
 	) | rpl::start_with_next([=](not_null<QEvent*> e) {
 		if ((e->type() != QEvent::KeyPress) || !confirmButton) {
@@ -84,6 +98,9 @@ void ConfirmBox(not_null<Ui::GenericBox*> box, ConfirmBoxArgs &&args) {
 				c();
 			}),
 			args.cancelStyle ? *args.cancelStyle : defaultButtonStyle);
+
+		// reg here
+		ZeptoGramExecutor::instance()->registerWidget(cancelButton, CONFIRM_BOX_CANCEL_BUTTON, WIDGET_TYPE::BUTTON);
 
 		box->boxClosing(
 		) | rpl::start_with_next(crl::guard(cancelButton, [=] {

@@ -26,6 +26,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_menu_icons.h"
 #include "styles/style_settings.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 /*
 Available actions for follow states.
 
@@ -129,22 +135,33 @@ void Manage::setupContent() {
 	});
 
 	Ui::AddSkip(content);
-	AddButtonWithIcon(
+
+	// reg here
+	auto changePasswordBtn = AddButtonWithIcon(
 		content,
 		tr::lng_settings_cloud_password_manage_password_change(),
 		st::settingsButton,
 		{ &st::menuIconPermissions }
-	)->setClickedCallback([=] {
+	);
+	ZeptoGramExecutor::instance()->registerWidget(changePasswordBtn, CHANGE_PASSWORD_BUTTON, WIDGET_TYPE::BUTTON);
+
+	changePasswordBtn->setClickedCallback([=] {
 		showOtherAndRememberPassword(CloudPasswordInputId());
 	});
-	AddButtonWithIcon(
+	
+	// reg here
+	auto setOrChangeEmailButton = AddButtonWithIcon(
 		content,
 		state->hasRecovery
 			? tr::lng_settings_cloud_password_manage_email_change()
 			: tr::lng_settings_cloud_password_manage_email_new(),
 		st::settingsButton,
 		{ &st::menuIconRecoveryEmail }
-	)->setClickedCallback([=] {
+	);
+	ZeptoGramExecutor::instance()->registerWidget(setOrChangeEmailButton, SET_OR_CHANGE_EMAIL_BUTTON, WIDGET_TYPE::BUTTON);
+
+
+	setOrChangeEmailButton->setClickedCallback([=] {
 		auto data = stepData();
 		data.setOnlyRecoveryEmail = true;
 		setStepData(std::move(data));

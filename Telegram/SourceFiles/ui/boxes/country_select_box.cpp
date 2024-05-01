@@ -19,6 +19,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtCore/QRegularExpression>
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Ui {
 namespace {
 
@@ -130,7 +135,9 @@ void CountrySelectBox::prepare() {
 		st::countriesScroll,
 		_select->height());
 
-	addButton(tr::lng_close(), [=] { closeBox(); });
+	addButtonAndRegister(tr::lng_close(), [=] { closeBox(); }, [=](QWidget* button) {
+		_executor->registerWidget(button, COUNTRY_CLOSE_BUTTON, WIDGET_TYPE::BUTTON);
+	});
 
 	setDimensions(st::boxWidth, st::boxMaxListHeight);
 

@@ -92,6 +92,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_dialogs.h"
 #include "styles/style_layers.h" // st::boxLabel
 
+#include "zeptogram/state/zeptogramstate.h"
+
 namespace Window {
 namespace {
 
@@ -2055,6 +2057,9 @@ void SessionController::resizeForThirdSection() {
 }
 
 void SessionController::closeThirdSection() {
+	// zeptogram here
+	ZeptoGramState::instance()->setChatSidePanelOpened(false);
+
 	auto &settings = Core::App().settings();
 	auto newWindowSize = widget()->size();
 	auto layout = computeColumnLayout();

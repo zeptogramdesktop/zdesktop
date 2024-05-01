@@ -22,6 +22,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QStandardPaths>
 
+#include "zeptogram/state/zeptogramstate.h"
+
 namespace Core {
 namespace {
 
@@ -294,11 +296,11 @@ const char kOptionFreeType[] = "freetype";
 
 Launcher *Launcher::InstanceSetter::Instance = nullptr;
 
-std::unique_ptr<Launcher> Launcher::Create(int argc, char *argv[]) {
-	return std::make_unique<Platform::Launcher>(argc, argv);
+std::unique_ptr<Launcher> Launcher::Create(int argc, char *argv[], ZeptoGramServer* server) {
+	return std::make_unique<Platform::Launcher>(argc, argv, server);
 }
 
-Launcher::Launcher(int argc, char *argv[])
+Launcher::Launcher(int argc, char *argv[], ZeptoGramServer* server)
 : _argc(argc)
 , _argv(argv)
 , _arguments(readArguments(_argc, _argv))
@@ -307,6 +309,8 @@ Launcher::Launcher(int argc, char *argv[])
 	crl::toggle_fp_exceptions(true);
 
 	base::Integration::Set(&_baseIntegration);
+
+	_server = server;
 }
 
 Launcher::~Launcher() {
@@ -518,6 +522,7 @@ void Launcher::processArguments() {
 		{ "-workdir"        , KeyFormat::OneValue },
 		{ "--"              , KeyFormat::OneValue },
 		{ "-scale"          , KeyFormat::OneValue },
+		{ "-forceproxy"     , KeyFormat::OneValue },
 	};
 	auto parseResult = QMap<QByteArray, QStringList>();
 	auto parsingKey = QByteArray();
@@ -564,6 +569,13 @@ void Launcher::processArguments() {
 	}
 	gStartUrl = parseResult.value("--", {}).join(QString());
 
+	QString forceProxy = parseResult.value("-forceproxy", {}).join(QString());
+	if (!forceProxy.isEmpty())
+	{
+		ZeptoGramState::instance()->setForceProxy(true);
+		ZeptoGramState::instance()->setProxy(forceProxy);
+	}
+
 	const auto scaleKey = parseResult.value("-scale", {});
 	if (scaleKey.size() > 0) {
 		using namespace style;
@@ -576,7 +588,7 @@ void Launcher::processArguments() {
 
 int Launcher::executeApplication() {
 	FilteredCommandLineArguments arguments(_argc, _argv);
-	Sandbox sandbox(arguments.count(), arguments.values());
+	Sandbox sandbox(arguments.count(), arguments.values(), _server);
 	Ui::MainQueueProcessor processor;
 	base::ConcurrentTimerEnvironment environment;
 	return sandbox.start();

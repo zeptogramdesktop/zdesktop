@@ -52,6 +52,7 @@ private:
 
 	bool _termsAccepted = false;
 
+	QString getPage() override;
 };
 
 } // namespace details

@@ -16,6 +16,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/flags.h"
 #include "base/object_ptr.h"
 
+#include <QPoint>
+
 namespace style {
 struct DialogRow;
 } // namespace style
@@ -81,6 +83,8 @@ enum class WidgetState {
 	Default,
 	Filtered,
 };
+
+
 
 class InnerWidget final : public Ui::RpWidget {
 public:
@@ -173,6 +177,8 @@ public:
 	~InnerWidget();
 
 	void parentGeometryChanged();
+	std::pair<QPoint, PeerId> getPointForChatWithUsername(const QString& username) const;
+	std::pair<QPoint, PeerId> getPointForChatWithPeerId(const uint64& peerId) const;
 
 protected:
 	void visibleTopBottomUpdated(

@@ -31,6 +31,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_layers.h"
 #include "styles/style_settings.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Settings::CloudPassword {
 
 void OneEdgeBoxContentDivider::skipEdge(Qt::Edge edge, bool skip) {
@@ -65,11 +71,17 @@ BottomButton CreateBottomDisableButton(
 
 	Ui::AddSkip(content);
 
-	content->add(object_ptr<Button>(
+
+	object_ptr<Button> btn = object_ptr<Button>(
 		content,
 		std::move(buttonText),
 		st::settingsAttentionButton
-	))->addClickHandler(std::move(callback));
+	);
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(btn, DISABLE_CLOUD_PASSWORD_BUTTON, WIDGET_TYPE::BUTTON);
+	content->add(std::move(btn))->addClickHandler(std::move(callback));
+
 
 	const auto divider = Ui::CreateChild<OneEdgeBoxContentDivider>(
 		parent.get());
@@ -145,11 +157,14 @@ void SetupHeader(
 
 	{
 		const auto &st = st::settingLocalPasscodeDescription;
+
+		// reg here
+		object_ptr<Ui::FlatLabel> aboutLabel = object_ptr<Ui::FlatLabel>(content, std::move(about), st);
+		ZeptoGramExecutor::instance()->registerWidget(aboutLabel, TWO_STEP_VERIFICATION_ABOUT_LABEL, WIDGET_TYPE::LABEL);
+
 		const auto wrap = content->add(
-			object_ptr<Ui::CenterWrap<>>(
-				content,
-				object_ptr<Ui::FlatLabel>(content, std::move(about), st)),
-			st::changePhoneDescriptionPadding);
+			object_ptr<Ui::CenterWrap<>>(content,  std::move(aboutLabel) ), st::changePhoneDescriptionPadding
+		);
 		wrap->resize(
 			wrap->width(),
 			st::settingLocalPasscodeDescriptionHeight);

@@ -10,6 +10,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/platform/base_platform_info.h"
 #include "storage/serialize_common.h"
 
+#include <QDebug>
+
 namespace Core {
 namespace {
 
@@ -126,6 +128,126 @@ QByteArray SettingsProxy::serialize() const {
 
 	stream.device()->close();
 	return result;
+}
+
+bool SettingsProxy::setForcedProxy(const QString& inputProxy)
+{
+	qDebug() << "ZPT:Trying to set proxy from: " << inputProxy;
+
+	//user:password@127.0.0.1:9432				-> HTTP
+	//127.0.0.1:9432							-> HTTP
+	//http://user:password@127.0.0.1:9432		-> HTTP
+	//http://127.0.0.1:9432						-> HTTP
+	//socks5://user:password@127.0.0.1:9432		-> SOCKS5
+	//socks5s://user:password@127.0.01:12345	-> SOCKS5
+	//socks5://127.0.01:12345					-> SOCKS5
+	//socks5s://127.0.01:12345					-> SOCKS5
+
+	struct ForceProxy {
+		QString type;
+		QString user;
+		QString password;
+		QString host;
+		int port;
+	};
+
+	const auto& setHostPort = [&](const QString& hp, ForceProxy& fp) {
+		if (!hp.contains(":"))
+		{
+			qDebug() << "ZPT: Wrong proxy format, cannot proceed";
+			return false;
+		}
+
+		QStringList res = hp.split(":");
+		fp.host = res.at(0);
+		fp.port = res.at(1).toInt();
+		return true;
+	};
+
+	const auto& setUserPassword = [&](const QString& up, ForceProxy& fp) {
+		if (!up.contains(":"))
+		{
+			qDebug() << "ZPT: Wrong proxy format, cannot proceed";
+			return false;
+		}
+
+		QStringList res = up.split(":");
+		fp.user = res.at(0);
+		fp.password = res.at(1);
+		return true;
+	};
+
+	if (inputProxy.isNull() || inputProxy.isEmpty())
+	{
+		qDebug() << "ZPT: Proxy value is empty, cannot proceed";
+		return false;
+	}
+
+	ForceProxy fpRes;
+	QString w = inputProxy.simplified();
+	if (w.startsWith('http'))
+	{
+		// http proxy
+		fpRes.type = 'http';
+	}
+	else if (w.startsWith("socks5"))
+	{
+		// socks5 proxy
+		fpRes.type = "socks5";
+	}
+
+	w = w.right(w.length() - w.indexOf("//") - 2);
+	if (w.contains("@"))
+	{
+		QStringList uphp = w.split("@");
+		bool r = setUserPassword(uphp.at(0), fpRes);
+		if (!r) {
+			return false;
+		}
+
+		r = setHostPort(uphp.at(1), fpRes);
+		if (!r) {
+			return false;
+		}
+	}
+	else
+	{
+		bool r = setHostPort(w, fpRes);
+		if (!r) {
+			return false;
+		}
+	}
+
+	// set the real proxy
+	_settings = MTP::ProxyData::Settings::Enabled;
+
+	MTP::ProxyData settingsProxy;
+	if (fpRes.type == "http") {
+		settingsProxy.type = MTP::ProxyData::Type::Http;
+	}
+	else if (fpRes.type == "socks5") {
+		settingsProxy.type = MTP::ProxyData::Type::Socks5;
+	}
+
+	settingsProxy.host = fpRes.host;
+	settingsProxy.port = fpRes.port;
+	
+	if (!fpRes.user.isNull() && !fpRes.user.isEmpty()) {
+		settingsProxy.user = fpRes.user;
+	}
+
+	if (!fpRes.password.isNull() && !fpRes.password.isEmpty()) {
+		settingsProxy.password = fpRes.password;
+	}
+
+	if (std::find(_list.begin(), _list.end(), settingsProxy) != _list.end()) {
+		// do nothing
+	}
+	else {
+		_list.push_back(settingsProxy);
+	}
+	_selected = settingsProxy;
+	return true;
 }
 
 bool SettingsProxy::setFromSerialized(const QByteArray &serialized) {

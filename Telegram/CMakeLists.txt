@@ -49,6 +49,15 @@ endif()
 
 set_target_properties(Telegram PROPERTIES AUTOMOC ON)
 
+include(FetchContent)
+FetchContent_Declare(qtpromise
+  GIT_REPOSITORY https://github.com/simonbrunel/qtpromise.git
+  GIT_TAG v0.7.0
+  GIT_SHALLOW true
+)
+# CMake v3.14+
+FetchContent_MakeAvailable(qtpromise)
+
 target_link_libraries(Telegram
 PRIVATE
     tdesktop::lib_tgcalls_legacy
@@ -91,6 +100,8 @@ PRIVATE
     desktop-app::external_openssl
     desktop-app::external_openal
     desktop-app::external_xxhash
+	
+	qtpromise
 )
 
 target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)
@@ -1545,6 +1556,85 @@ PRIVATE
     stdafx.h
     tray.cpp
     tray.h
+	
+	# main
+	zeptogram/zeptogramexecutor.h
+	zeptogram/zeptogramexecutor.cpp
+	
+	# constants
+	zeptogram/constants/eventtypes.h
+	zeptogram/constants/pageconstants.h
+	zeptogram/constants/widgettypes.h
+	
+	# main etc
+	zeptogram/main/externalcommands.h
+	zeptogram/main/executeresult.h
+	zeptogram/main/executeresult.cpp
+	zeptogram/main/pageable.h
+	zeptogram/main/pageable.cpp
+	zeptogram/main/pagechangeable.h
+	zeptogram/main/pagechangeable.cpp
+	zeptogram/main/widgetexecutor.h
+	zeptogram/main/widgetexecutor.cpp
+	zeptogram/main/scenarioservice.h
+	zeptogram/main/scenarioservice.cpp
+	
+	# server
+	zeptogram/server/zeptogramserver.h
+	zeptogram/server/zeptogramserver.cpp
+	
+	# state
+	zeptogram/state/zeptogramstate.h
+	zeptogram/state/zeptogramstate.cpp
+	
+	# util
+	zeptogram/util/EnumReflection.h
+	zeptogram/util/EnumReflection.cpp
+	
+	# web etc
+	zeptogram/web/requestHandler.h
+	zeptogram/web/requestHandler.cpp
+	
+	# external libs: httpServer
+	zeptogram/httpServer/const.h
+	zeptogram/httpServer/httpConnection.h
+	zeptogram/httpServer/httpCookie.h
+	zeptogram/httpServer/httpData.h
+	zeptogram/httpServer/httpRequest.h
+	zeptogram/httpServer/httpRequestHandler.h
+	zeptogram/httpServer/httpRequestRouter.h
+	zeptogram/httpServer/httpResponse.h
+	zeptogram/httpServer/httpServer.h
+	zeptogram/httpServer/httpServerConfig.h
+	zeptogram/httpServer/middleware.h
+	zeptogram/httpServer/util.h
+	zeptogram/httpServer/httpConnection.cpp
+	zeptogram/httpServer/httpData.cpp
+	zeptogram/httpServer/httpRequest.cpp
+	zeptogram/httpServer/httpRequestRouter.cpp
+	zeptogram/httpServer/httpResponse.cpp
+	zeptogram/httpServer/httpServer.cpp
+	zeptogram/httpServer/middleware/CORS.cpp
+	zeptogram/httpServer/middleware/auth.cpp
+	zeptogram/httpServer/middleware/getArray.cpp
+	zeptogram/httpServer/middleware/getObject.cpp
+	zeptogram/httpServer/middleware/verifyJson.cpp
+	zeptogram/httpServer/util.cpp
+	
+	# external libs: event_bus
+	zeptogram/eventbus/event_bus.hpp
+	zeptogram/eventbus/detail/function_traits.hpp
+	
+	# external libs: magic_enum
+	zeptogram/magic_enum/magic_enum.hpp
+	zeptogram/magic_enum/magic_enum_all.hpp
+	zeptogram/magic_enum/magic_enum_containers.hpp
+	zeptogram/magic_enum/magic_enum_flags.hpp
+	zeptogram/magic_enum/magic_enum_format.hpp
+	zeptogram/magic_enum/magic_enum_fuse.hpp
+	zeptogram/magic_enum/magic_enum_iostream.hpp
+	zeptogram/magic_enum/magic_enum_switch.hpp
+	zeptogram/magic_enum/magic_enum_utility.hpp
 )
 
 if (NOT build_winstore)

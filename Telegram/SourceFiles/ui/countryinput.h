@@ -37,6 +37,8 @@ public:
 
 	rpl::producer<QString> codeChanged() const;
 
+	void setText(const QString& newText);
+
 protected:
 	void paintEvent(QPaintEvent *e) override;
 	void mouseMoveEvent(QMouseEvent *e) override;
@@ -46,7 +48,6 @@ protected:
 
 private:
 	void chooseCountry(not_null<const Countries::Info*> info, int codeIndex);
-	void setText(const QString &newText);
 
 	const std::shared_ptr<Ui::Show> _show;
 	const style::InputField &_st;

@@ -32,6 +32,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtCore/QDirIterator>
 
+#include "zeptogram/state/zeptogramstate.h"
+
 #ifndef Q_OS_WIN
 #include <unistd.h>
 #endif // Q_OS_WIN
@@ -403,6 +405,14 @@ void start() {
 
 		if (!ReadSetting(blockId, settings.stream, settingsData.version, context)) {
 			return writeSettings();
+		}
+		
+		// zeptogram here
+		if (ZeptoGramState::instance()->isForceProxy()) {
+			// forced proxy - it means we read proxy settings from command line on prev step -> ReadSetting
+			// need to save them into storage
+			qDebug() << "ZPT: Saving settings";
+			writeSettings();
 		}
 	}
 

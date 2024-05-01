@@ -30,6 +30,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_layers.h"
 #include "styles/style_settings.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 /*
 Available actions for follow states.
 
@@ -187,24 +193,32 @@ void Input::setupContent() {
 
 	Ui::AddSkip(content, st::settingLocalPasscodeDescriptionBottomSkip);
 
+	// reg here
 	const auto newInput = AddPasswordField(
 		content,
 		isCheck
 			? tr::lng_cloud_password_enter_old()
 			: tr::lng_cloud_password_enter_new(),
 			currentStepDataPassword);
+	ZeptoGramExecutor::instance()->registerWidget(newInput, TWO_STEP_CREATE_PASSWORD_ENTER_PASSWORD_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
+
 	const auto reenterInput = isCheck
 		? (Ui::PasswordInput*)(nullptr)
 		: AddPasswordField(
 			content,
 			tr::lng_cloud_password_confirm_new(),
 			currentStepDataPassword).get();
+	ZeptoGramExecutor::instance()->registerWidget(reenterInput, TWO_STEP_CREATE_PASSWORD_RE_ENTER_PASSWORD_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
+
+
 	const auto error = AddError(content, newInput);
 	if (reenterInput) {
 		QObject::connect(reenterInput, &Ui::MaskedInputField::changed, [=] {
 			error->hide();
 		});
 	}
+	ZeptoGramExecutor::instance()->registerWidget(error, TWO_STEP_CREATE_PASSWORD_ERROR_LABEL, WIDGET_TYPE::LABEL);
+
 
 	if (isCheck) {
 		AddSkipInsteadOfField(content);
@@ -215,6 +229,9 @@ void Input::setupContent() {
 			tr::lng_signin_hint(tr::now, lt_password_hint, hint),
 			st::defaultFlatLabel);
 		hintInfo->setVisible(!hint.isEmpty());
+		ZeptoGramExecutor::instance()->registerWidget(hintInfo, TWO_STEP_CREATE_PASSWORD_HINT_LABEL, WIDGET_TYPE::LABEL);
+
+
 		error->geometryValue(
 		) | rpl::start_with_next([=](const QRect &r) {
 			hintInfo->setGeometry(r);
@@ -397,6 +414,7 @@ void Input::setupContent() {
 			showOther(CloudPasswordHintId());
 		}
 	});
+	ZeptoGramExecutor::instance()->registerWidget(button, TWO_STEP_CREATE_PASSWORD_CONTINUE_BUTTON, WIDGET_TYPE::BUTTON);
 
 	base::qt_signal_producer(
 		newInput.get(),

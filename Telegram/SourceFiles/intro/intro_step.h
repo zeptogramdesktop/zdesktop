@@ -12,6 +12,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/rp_widget.h"
 #include "ui/effects/animations.h"
 
+#include "zeptogram/main/pageable.h"
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace style {
 struct RoundButton;
 } // namespace style;
@@ -35,7 +38,7 @@ struct Data;
 enum class StackAction;
 enum class Animate;
 
-class Step : public Ui::RpWidget {
+class Step : public Ui::RpWidget, public Pageable {
 public:
 	Step(
 		QWidget *parent,
@@ -207,6 +210,8 @@ private:
 	std::unique_ptr<Ui::SlideAnimation> _slideAnimation;
 	QPixmap _coverMask;
 
+	virtual QString getPage() override;
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 

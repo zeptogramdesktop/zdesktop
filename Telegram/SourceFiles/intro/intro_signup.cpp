@@ -19,6 +19,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_intro.h"
 #include "styles/style_boxes.h"
 
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Intro {
 namespace details {
 
@@ -53,6 +57,11 @@ SignupWidget::SignupWidget(
 	setTitleText(tr::lng_signup_title());
 	setDescriptionText(tr::lng_signup_desc());
 	setMouseTracking(true);
+}
+
+QString SignupWidget::getPage()
+{
+	return PAGE_NAME_SIGNUP_STEP;
 }
 
 void SignupWidget::finishInit() {

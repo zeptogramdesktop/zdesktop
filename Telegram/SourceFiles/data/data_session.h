@@ -14,6 +14,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/history_location_manager.h"
 #include "base/timer.h"
 
+#include <QList>
+#include <QPair>
+
 class Image;
 class HistoryItem;
 struct WebPageCollage;
@@ -768,6 +771,9 @@ public:
 		std::vector<ReactionId> &&now);
 
 	void clearLocalStorage();
+
+	// zeptogram here
+	QList<QPair<MsgId, HistoryItem*>> getMessagesForPeer(PeerId peerId);
 
 private:
 	using Messages = std::unordered_map<MsgId, not_null<HistoryItem*>>;

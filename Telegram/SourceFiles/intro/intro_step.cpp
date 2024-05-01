@@ -39,6 +39,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_intro.h"
 #include "styles/style_window.h"
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
 namespace Intro {
 namespace details {
 namespace {
@@ -102,9 +105,19 @@ Step::Step(
 		_description->entity()->setMarkedText(text);
 		updateLabelsPosition();
 	}, lifetime());
+
+	initPageable(this, [=] { Q_EMIT getEmitter()->pageChanged(); });
+
+	getZeptoGramExecutor()->registerWidget(_description, TITLE_LABEL, WIDGET_TYPE::LABEL);
+	getZeptoGramExecutor()->registerWidget(_description, DESCRIPTION_LABEL, WIDGET_TYPE::LABEL);                    
 }
 
 Step::~Step() = default;
+
+QString Step::getPage()
+{
+	return "UNKNOWN";
+}
 
 MTP::Sender &Step::api() const {
 	if (!_api) {
@@ -296,6 +309,7 @@ void Step::showFinished() {
 	_slideAnimation.reset();
 	prepareCoverMask();
 	activate();
+	pageChanged();
 }
 
 bool Step::paintAnimated(QPainter &p, QRect clip) {

@@ -10,6 +10,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/object_ptr.h"
 #include "ui/rp_widget.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace style {
 struct MultiSelect;
 } // namespace style
@@ -53,6 +55,8 @@ public:
 	QVector<uint64> getItems() const;
 	bool hasItem(uint64 itemId) const;
 
+	class Inner;
+
 protected:
 	int resizeGetHeight(int newWidth) override;
 	bool eventFilter(QObject *o, QEvent *e) override;
@@ -64,12 +68,13 @@ private:
 
 	object_ptr<Ui::ScrollArea> _scroll;
 
-	class Inner;
+	
 	QPointer<Inner> _inner;
 
 	Fn<void()> _resizedCallback;
 	Fn<void(const QString &query)> _queryChangedCallback;
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 } // namespace Ui

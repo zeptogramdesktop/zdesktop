@@ -26,6 +26,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_layers.h"
 #include "styles/style_info.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Settings {
 namespace {
 
@@ -215,6 +221,7 @@ private:
 
 	object_ptr<Ui::FadeShadow> _topShadow;
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 IntroWidget::IntroWidget(
@@ -293,6 +300,7 @@ void IntroWidget::createTopBar(not_null<Window::Controller*> window) {
 	close->addClickHandler([=] {
 		window->hideSettingsAndLayer();
 	});
+	_executor->registerWidget(close, CLOSE_SETTINGS_BUTTON, WIDGET_TYPE::BUTTON);
 
 	_topBar->lower();
 	_topBar->resizeToWidth(width());

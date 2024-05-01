@@ -67,6 +67,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtGui/QWindow>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace HistoryView {
 namespace {
 
@@ -141,10 +147,19 @@ TopBarWidget::TopBarWidget(
 	_groupCall->setClickedCallback([=] { groupCall(); });
 	_menuToggle->setClickedCallback([=] { showPeerMenu(); });
 	_infoToggle->setClickedCallback([=] { toggleInfoSection(); });
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_infoToggle, MAIN_CHAT_INFO_TOGGLE_BUTTON, WIDGET_TYPE::BUTTON);
+
 	_back->setAcceptBoth();
 	_back->addClickHandler([=](Qt::MouseButton) {
 		InvokeQueued(_back.data(), [=] { backClicked(); });
 	});
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_back, MAIN_CHAT_BACK_BUTTON, WIDGET_TYPE::BUTTON);
+
+
 	_cancelChoose->setClickedCallback(
 		[=] { _cancelChooseForReport.fire({}); });
 

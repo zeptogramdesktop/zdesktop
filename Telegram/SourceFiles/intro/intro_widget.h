@@ -14,6 +14,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/core_cloud_password.h"
 #include "media/player/media_player_float.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace Main {
 class Account;
 } // namespace Main
@@ -205,6 +207,7 @@ private:
 
 	mtpRequestId _resetRequest = 0;
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 } // namespace Intro

@@ -174,6 +174,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QWindow>
 #include <QtCore/QMimeData>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace {
 
 constexpr auto kMessagesPerPageFirst = 30;
@@ -328,6 +334,10 @@ HistoryWidget::HistoryWidget(
 
 	_unblock->addClickHandler([=] { unblockUser(); });
 	_botStart->addClickHandler([=] { sendBotStartCommand(); });
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_botStart, MAIN_DIALOG_START_BOT_BUTTON, WIDGET_TYPE::BUTTON);
+
 	_joinChannel->addClickHandler([=] { joinChannel(); });
 	_muteUnmute->addClickHandler([=] { toggleMuteUnmute(); });
 	_reportMessages->addClickHandler([=] { reportSelectedMessages(); });
@@ -2377,6 +2387,11 @@ void HistoryWidget::showHistory(
 		_list = _scroll->setOwnedWidget(
 			object_ptr<HistoryInner>(this, _scroll, controller(), _history));
 		_list->show();
+
+		// reg here
+		ZeptoGramExecutor::instance()->registerWidget(_list, MAIN_DIALOG_HISTORY_WIDGET, WIDGET_TYPE::_HISTORY_WIDGET);
+		ZeptoGramExecutor::instance()->registerWidget(_joinChannel, MAIN_CHAT_JOIN_CHANNEL_BUTTON, WIDGET_TYPE::BUTTON);
+		ZeptoGramExecutor::instance()->registerWidget(_joinChannel, MAIN_CHAT_MUTE_UNMUTE_CHANNEL_BUTTON, WIDGET_TYPE::BUTTON);
 
 		if (const auto channel = _peer->asChannel()) {
 			channel->updateFull();

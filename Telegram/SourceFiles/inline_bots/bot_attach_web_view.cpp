@@ -56,6 +56,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QSvgRenderer>
 
+#include "zeptogram/state/zeptogramstate.h"
+
 namespace InlineBots {
 namespace {
 
@@ -780,6 +782,9 @@ void AttachWebView::botInvokeCustomMethod(
 
 void AttachWebView::botClose() {
 	crl::on_main(this, [=] { cancel(); });
+
+	// zeptogram here
+	ZeptoGramState::instance()->setBotWebViewOpened(false);
 }
 
 AttachWebView::Context AttachWebView::LookupContext(
@@ -911,6 +916,9 @@ void AttachWebView::cancel() {
 	_botUsername = QString();
 	_botAppName = QString();
 	_startCommand = QString();
+
+	// zeptogram here
+	ZeptoGramState::instance()->setBotWebViewOpened(false);
 }
 
 void AttachWebView::requestBots(Fn<void()> callback) {

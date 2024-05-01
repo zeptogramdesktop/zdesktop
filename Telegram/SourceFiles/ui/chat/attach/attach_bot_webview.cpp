@@ -35,6 +35,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/state/zeptogramstate.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
+
 namespace Ui::BotWebView {
 namespace {
 
@@ -347,6 +355,9 @@ Panel::Panel(
 		postEvent("back_button_pressed");
 	}, _widget->lifetime());
 
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_widget->getCloseButton(), BOT_WEBVIEW_CLOSE_BUTTON, WIDGET_TYPE::BUTTON);
+
 	rpl::merge(
 		style::PaletteChanged(),
 		_themeUpdateForced.events()
@@ -545,6 +556,9 @@ bool Panel::showWebview(
 			});
 		}
 	});
+
+	// zeptogram here
+	ZeptoGramState::instance()->setBotWebViewOpened(true);
 	return true;
 }
 

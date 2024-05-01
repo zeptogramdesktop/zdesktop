@@ -11,6 +11,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "intro/intro_step.h"
 #include "base/timer.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace Intro {
 namespace details {
 
@@ -50,6 +52,8 @@ private:
 	mtpRequestId _requestId = 0;
 	bool _forceRefresh = false;
 
+	QString getPage() override;
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 [[nodiscard]] QImage TelegramLogoImage();

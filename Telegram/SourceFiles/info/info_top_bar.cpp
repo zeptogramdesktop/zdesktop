@@ -31,6 +31,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_dialogs.h"
 #include "styles/style_info.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Info {
 
 TopBar::TopBar(
@@ -142,6 +148,8 @@ void TopBar::enableBackButton() {
 	registerToggleControlCallback(_back.data(), [=] {
 		return !selectionMode();
 	});
+
+	ZeptoGramExecutor::instance()->registerWidget(_back->entity(), BACK_DIALOG_ARROW_BUTTON, WIDGET_TYPE::BUTTON);
 
 	if (_title) {
 		_title->setAttribute(Qt::WA_TransparentForMouseEvents);

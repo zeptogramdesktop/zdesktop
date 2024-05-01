@@ -60,6 +60,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtSvg/QSvgRenderer>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Settings {
 namespace {
 
@@ -461,13 +467,17 @@ void SetupCloudPassword(
 			: tr::lng_settings_cloud_password_off(tr::now);
 	});
 
-	AddButtonWithLabel(
+	// reg here
+	auto btn = AddButtonWithLabel(
 		container,
 		tr::lng_settings_cloud_password_start_title(),
 		std::move(label),
 		st::settingsButton,
 		{ &st::menuIconPermissions }
-	)->addClickHandler([=, passwordState = base::duplicate(passwordState)] {
+	);
+	ZeptoGramExecutor::instance()->registerWidget(btn, TWO_STEP_VER_BUTTON, WIDGET_TYPE::BUTTON);
+
+	btn->addClickHandler([=, passwordState = base::duplicate(passwordState)] {
 		const auto state = rpl::variable<PasswordState>(
 			base::duplicate(passwordState)).current();
 		if (state == PasswordState::Loading) {

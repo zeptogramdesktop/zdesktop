@@ -19,6 +19,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <set>
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+#include "zeptogram/zeptogramexecutor.h"
+
+using namespace zeptogram;
+
 namespace Ui {
 namespace {
 
@@ -507,6 +513,7 @@ private:
 	Fn<void(uint64 itemId)> _itemRemovedCallback;
 	Fn<void(int heightDelta)> _resizedCallback;
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 MultiSelect::MultiSelect(
@@ -681,6 +688,9 @@ MultiSelect::Inner::Inner(
 		_field->setFocus();
 	});
 	setMouseTracking(true);
+
+	_executor->registerWidget(_field, SEARCH_INPUT, WIDGET_TYPE::INPUT_FIELD);
+	_executor->registerWidget(this, SCROLL_LIST, WIDGET_TYPE::_SCROLL_LIST);
 }
 
 void MultiSelect::Inner::queryChanged() {

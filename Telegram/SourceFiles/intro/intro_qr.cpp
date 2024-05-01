@@ -29,6 +29,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "qr/qr_generate.h"
 #include "styles/style_intro.h"
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Intro {
 namespace details {
 namespace {
@@ -197,6 +202,11 @@ QrWidget::QrWidget(
 	}, lifetime());
 }
 
+QString QrWidget::getPage()
+{
+	return PAGE_NAME_QR_STEP;
+}
+
 int QrWidget::errorTop() const {
 	return contentTop() + st::introQrErrorTop;
 }
@@ -311,6 +321,8 @@ void QrWidget::setupControls() {
 	}, skip->lifetime());
 
 	skip->setClickedCallback([=] { submit(); });
+
+	_executor->registerWidget(skip, LOGIN_PHONE_BUTTON, WIDGET_TYPE::BUTTON);
 }
 
 void QrWidget::refreshCode() {

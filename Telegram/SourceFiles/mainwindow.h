@@ -10,6 +10,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "platform/platform_main_window.h"
 #include "ui/layers/layer_widget.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/state/zeptogramstate.h"
+#include "zeptogram/main/scenarioservice.h"
+
+#include <QObject>
+
 class MainWidget;
 
 namespace Intro {
@@ -39,6 +45,7 @@ class MediaPreviewWidget;
 extern const char kOptionAutoScrollInactiveChat[];
 
 class MainWindow : public Platform::MainWindow {
+	Q_OBJECT
 public:
 	explicit MainWindow(not_null<Window::Controller*> controller);
 	~MainWindow();
@@ -131,4 +138,10 @@ private:
 
 	object_ptr<Window::Theme::WarningWidget> _testingThemeWarning = { nullptr };
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
+	ZeptoGramState* _state = ZeptoGramState::instance();
+	ScenarioService* _scService = ScenarioService::instance();
+
+Q_SIGNALS:
+	void mainMenuOpened();
 };

@@ -15,6 +15,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_account.h"
 #include "main/main_app_config.h"
 
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Intro {
 namespace details {
 
@@ -24,9 +28,14 @@ StartWidget::StartWidget(
 	not_null<Data*> data)
 : Step(parent, account, data, true) {
 	setMouseTracking(true);
-	setTitleText(rpl::single(u"Telegram Desktop"_q));
+	setTitleText(rpl::single(u"Zeptogram Desktop"_q));
 	setDescriptionText(tr::lng_intro_about());
 	show();
+}
+
+QString StartWidget::getPage()
+{
+	return PAGE_NAME_START_STEP;
 }
 
 void StartWidget::submit() {

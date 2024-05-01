@@ -48,6 +48,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_menu_icons.h"
 #include "styles/style_settings.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
+
 #ifdef Q_OS_MAC
 #include "base/platform/mac/base_confirm_quit.h"
 #endif // Q_OS_MAC
@@ -99,6 +106,8 @@ void SetupConnectionType(
 	button->addClickHandler([=] {
 		controller->show(ProxiesBoxController::CreateOwningBox(account));
 	});
+
+	ZeptoGramExecutor::instance()->registerWidget(button, CONNECTION_TYPE_BUTTON, WIDGET_TYPE::BUTTON);
 }
 
 bool HasUpdate() {

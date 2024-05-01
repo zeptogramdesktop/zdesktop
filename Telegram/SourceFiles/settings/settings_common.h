@@ -13,6 +13,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/object_ptr.h"
 #include "settings/settings_type.h"
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace anim {
 enum class repeat : uchar;
 } // namespace anim
@@ -169,6 +174,7 @@ not_null<Button*> AddButtonWithIcon(
 	rpl::producer<QString> text,
 	const style::SettingsButton &st,
 	IconDescriptor &&descriptor = {});
+
 not_null<Button*> AddButtonWithLabel(
 	not_null<Ui::VerticalLayout*> container,
 	rpl::producer<QString> text,
@@ -180,6 +186,28 @@ void CreateRightLabel(
 	rpl::producer<QString> label,
 	const style::SettingsButton &st,
 	rpl::producer<QString> buttonText);
+
+// zeptogram here
+not_null<Button*> ZAddButtonWithLabel(
+	not_null<Ui::VerticalLayout*> container,
+	rpl::producer<QString> text,
+	rpl::producer<QString> label,
+	const style::SettingsButton& st,
+	IconDescriptor&& descriptor = {},
+	const QString& rightLabelName = "", WIDGET_TYPE rlType = WIDGET_TYPE::NONE);
+void ZCreateRightLabel(
+	not_null<Button*> button,
+	rpl::producer<QString> label,
+	const style::SettingsButton& st,
+	rpl::producer<QString> buttonText,
+	const QString& rightLabelName = "", WIDGET_TYPE rlType = WIDGET_TYPE::NONE);
+
+object_ptr<Ui::FlatLabel> doCreateRightLabel(not_null<Button*> button,
+	rpl::producer<QString> label,
+	const style::SettingsButton& st,
+	rpl::producer<QString> buttonText);
+// end of zeprtogram
+
 
 struct DividerWithLottieDescriptor {
 	QString lottie;

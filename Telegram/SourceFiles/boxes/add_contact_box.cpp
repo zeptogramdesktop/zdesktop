@@ -49,6 +49,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace {
 
 bool IsValidPhone(QString phone) {
@@ -1019,17 +1025,17 @@ void SetupChannelBox::prepare() {
 	}).send();
 
 	addButton(tr::lng_settings_save(), [=] { save(); });
-
 	const auto cancel = [=] {
 		if (_mustBePublic) {
 			MustBePublicDestroy(_channel);
 		}
 		closeBox();
 	};
+	
 	addButton(
 		_mustBePublic ? tr::lng_cancel() : tr::lng_create_group_skip(),
 		cancel);
-
+	
 	connect(_link, &Ui::MaskedInputField::changed, [=] { handleChange(); });
 	_link->setVisible(_privacyGroup->current() == Privacy::Public);
 
@@ -1520,6 +1526,10 @@ EditNameBox::EditNameBox(QWidget*, not_null<UserData*> user)
 	tr::lng_signup_lastname(),
 	_user->lastName)
 , _invertOrder(langFirstNameGoesSecond()) {
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_first, FIRST_NAME_INPUT_FIELD, WIDGET_TYPE::INPUT_FIELD);
+	ZeptoGramExecutor::instance()->registerWidget(_last, LAST_NAME_INPUT_FIELD, WIDGET_TYPE::INPUT_FIELD);
 }
 
 void EditNameBox::prepare() {
@@ -1531,8 +1541,15 @@ void EditNameBox::prepare() {
 	newHeight += st::boxPadding.bottom() + st::contactPadding.bottom();
 	setDimensions(st::boxWidth, newHeight);
 
-	addButton(tr::lng_settings_save(), [=] { save(); });
-	addButton(tr::lng_cancel(), [=] { closeBox(); });
+	// reg here
+	QPointer<Ui::RoundButton> _saveButtonP = addButton(tr::lng_settings_save(), [=] { save(); });
+	Ui::RoundButton* _saveButton = _saveButtonP.data();
+	ZeptoGramExecutor::instance()->registerWidget(_saveButton, SAVE_DIALOG_BUTTON, WIDGET_TYPE::BUTTON);
+
+	QPointer<Ui::RoundButton> _cancelButtonP = addButton(tr::lng_cancel(), [=] { closeBox(); });
+	Ui::RoundButton* _cancelButton = _cancelButtonP.data();
+	ZeptoGramExecutor::instance()->registerWidget(_cancelButton, CANCEL_DIALOG_BUTTON, WIDGET_TYPE::BUTTON);
+
 	if (_invertOrder) {
 		setTabOrder(_last, _first);
 	}

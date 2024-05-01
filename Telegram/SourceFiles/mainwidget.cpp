@@ -92,6 +92,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtCore/QCoreApplication>
 #include <QtCore/QMimeData>
 
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
+
 enum StackItemType {
 	HistoryStackItem,
 	SectionStackItem,
@@ -402,6 +407,13 @@ MainWidget::MainWidget(
 	cSetOtherOnline(0);
 
 	_history->start();
+
+	initPageable(this, [=] { Q_EMIT getEmitter()->pageChanged(); });
+}
+
+QString MainWidget::getPage()
+{
+	return PAGE_NAME_MAIN_WINDOW;
 }
 
 MainWidget::~MainWidget() = default;
@@ -2794,6 +2806,8 @@ void MainWidget::activate() {
 		}
 	}
 	_controller->widget()->fixOrder();
+
+	pageChanged();
 }
 
 bool MainWidget::animatingShow() const {

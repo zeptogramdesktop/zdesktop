@@ -42,6 +42,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace {
 
 constexpr auto kSaveSettingsDelayedTimeout = crl::time(1000);
@@ -597,8 +603,12 @@ ProxiesBox::ProxiesBox(
 void ProxiesBox::prepare() {
 	setTitle(tr::lng_proxy_settings());
 
-	addButton(tr::lng_proxy_add(), [=] { addNewProxy(); });
-	addButton(tr::lng_close(), [=] { closeBox(); });
+	// reg here
+	auto confirmButton = addButton(tr::lng_proxy_add(), [=] { addNewProxy(); });
+	ZeptoGramExecutor::instance()->registerWidget(confirmButton.data(), ADD_PROXY_CONFIRM_BUTTON, WIDGET_TYPE::BUTTON);
+
+	auto closeButton = addButton(tr::lng_close(), [=] { closeBox(); });
+	ZeptoGramExecutor::instance()->registerWidget(closeButton.data(), ADD_PROXY_CLOSE_BUTTON, WIDGET_TYPE::BUTTON);
 
 	setupContent();
 }
@@ -615,27 +625,38 @@ void ProxiesBox::setupContent() {
 	_proxySettings
 		= std::make_shared<Ui::RadioenumGroup<ProxyData::Settings>>(
 			_settings.settings());
-	inner->add(
-		object_ptr<Ui::Radioenum<ProxyData::Settings>>(
-			inner,
-			_proxySettings,
-			ProxyData::Settings::Disabled,
-			tr::lng_proxy_disable(tr::now)),
-		st::proxyUsePadding);
-	inner->add(
-		object_ptr<Ui::Radioenum<ProxyData::Settings>>(
-			inner,
-			_proxySettings,
-			ProxyData::Settings::System,
-			tr::lng_proxy_use_system_settings(tr::now)),
-		st::proxyUsePadding);
-	inner->add(
-		object_ptr<Ui::Radioenum<ProxyData::Settings>>(
-			inner,
-			_proxySettings,
-			ProxyData::Settings::Enabled,
-			tr::lng_proxy_use_custom(tr::now)),
-		st::proxyUsePadding);
+
+	// reg here
+	auto disableProxy = object_ptr<Ui::Radioenum<ProxyData::Settings>>(
+		inner,
+		_proxySettings,
+		ProxyData::Settings::Disabled,
+		tr::lng_proxy_disable(tr::now));
+	ZeptoGramExecutor::instance()->registerWidget(disableProxy, DISABLE_PROXY_BUTTON, WIDGET_TYPE::_RADIO_BUTTON);
+	inner->add(std::move(disableProxy), st::proxyUsePadding);
+	
+	
+	// reg here
+	auto useSystemProxy = object_ptr<Ui::Radioenum<ProxyData::Settings>>(
+		inner,
+		_proxySettings,
+		ProxyData::Settings::System,
+		tr::lng_proxy_use_system_settings(tr::now));
+	ZeptoGramExecutor::instance()->registerWidget(useSystemProxy, USE_SYSTEM_PROXY_BUTTON, WIDGET_TYPE::_RADIO_BUTTON);
+
+	inner->add(std::move(useSystemProxy), st::proxyUsePadding);
+
+	// reg here
+	auto customProxyRadio = object_ptr<Ui::Radioenum<ProxyData::Settings>>(
+		inner,
+		_proxySettings,
+		ProxyData::Settings::Enabled,
+		tr::lng_proxy_use_custom(tr::now));
+
+	ZeptoGramExecutor::instance()->registerWidget(customProxyRadio, CUSTOM_PROXY_RADIO_BUTTON, WIDGET_TYPE::_RADIO_BUTTON);
+	inner->add(std::move(customProxyRadio), st::proxyUsePadding);
+
+
 	_proxyForCalls = inner->add(
 		object_ptr<Ui::SlideWrap<Ui::Checkbox>>(
 			inner,
@@ -861,12 +882,18 @@ void ProxyBox::prepare() {
 
 void ProxyBox::refreshButtons() {
 	clearButtons();
-	addButton(tr::lng_settings_save(), [=] { save(); });
-	addButton(tr::lng_cancel(), [=] { closeBox(); });
+	
+	auto saveButton = addButton(tr::lng_settings_save(), [=] { save(); });
+	ZeptoGramExecutor::instance()->registerWidget(saveButton, SAVE_PROXY_BUTTON, WIDGET_TYPE::BUTTON);
+	
+	auto cancelButton = addButton(tr::lng_cancel(), [=] { closeBox(); });
+	ZeptoGramExecutor::instance()->registerWidget(cancelButton, CANCEL_PROXY_BUTTON, WIDGET_TYPE::BUTTON);
+
 
 	const auto type = _type->current();
 	if (type == Type::Socks5 || type == Type::Mtproto) {
-		addLeftButton(tr::lng_proxy_share(), [=] { share(); });
+		auto shareButton = addLeftButton(tr::lng_proxy_share(), [=] { share(); });
+		ZeptoGramExecutor::instance()->registerWidget(shareButton, SHARE_PROXY_BUTTON, WIDGET_TYPE::BUTTON);
 	}
 }
 
@@ -944,17 +971,24 @@ void ProxyBox::setupSocketAddress(const ProxyData &data) {
 			_content,
 			st::connectionHostInputField.heightMin),
 		st::proxyEditInputPadding);
+
+	// reg here
 	_host = Ui::CreateChild<HostInput>(
 		address,
 		st::connectionHostInputField,
 		tr::lng_connection_host_ph(),
 		data.host);
+	ZeptoGramExecutor::instance()->registerWidget(_host.data(), PROXY_HOSTNAME_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
+
 	_port = Ui::CreateChild<Ui::NumberInput>(
 		address,
 		st::connectionPortInputField,
 		tr::lng_connection_port_ph(),
 		data.port ? QString::number(data.port) : QString(),
 		65535);
+	ZeptoGramExecutor::instance()->registerWidget(_port.data(), PROXY_PORT_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
+
+
 	address->widthValue(
 	) | rpl::start_with_next([=](int width) {
 		_port->moveToRight(0, 0);
@@ -972,6 +1006,7 @@ void ProxyBox::setupCredentials(const ProxyData &data) {
 			object_ptr<Ui::VerticalLayout>(_content)));
 	const auto credentials = _credentials->entity();
 	addLabel(credentials, tr::lng_proxy_credentials_optional(tr::now));
+	
 	_user = credentials->add(
 		object_ptr<Ui::InputField>(
 			credentials,
@@ -980,12 +1015,19 @@ void ProxyBox::setupCredentials(const ProxyData &data) {
 			data.user),
 		st::proxyEditInputPadding);
 
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_user, PROXY_USERNAME_INPUT, WIDGET_TYPE::INPUT_FIELD);
+
 	auto passwordWrap = object_ptr<Ui::RpWidget>(credentials);
+
+	// reg here
 	_password = Ui::CreateChild<Ui::PasswordInput>(
 		passwordWrap.data(),
 		st::connectionPasswordInputField,
 		tr::lng_connection_password_ph(),
 		(data.type == Type::Mtproto) ? QString() : data.password);
+	ZeptoGramExecutor::instance()->registerWidget(_password, PROXY_PASSWORD_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
+
 	_password->move(0, 0);
 	_password->heightValue(
 	) | rpl::start_with_next([=, wrap = passwordWrap.data()](int height) {
@@ -1022,6 +1064,9 @@ void ProxyBox::setupMtprotoCredentials(const ProxyData &data) {
 		_secret->resize(width, _secret->height());
 	}, _secret->lifetime());
 	mtproto->add(std::move(secretWrap), st::proxyEditInputPadding);
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_secret.data(), PROXY_SECRET_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
 }
 
 void ProxyBox::setupControls(const ProxyData &data) {
@@ -1033,7 +1078,25 @@ void ProxyBox::setupControls(const ProxyData &data) {
 	_content->resizeToWidth(st::boxWideWidth);
 	_content->moveToLeft(0, 0);
 
+
 	setupTypes();
+
+	// reg here - after setupTypes, or _buttons will be empty
+	const auto socks5Button = _type->getButtonForText("SOCKS5");
+	if (socks5Button != nullptr) {
+		ZeptoGramExecutor::instance()->registerWidget(socks5Button, PROXY_TYPE_SOCKS5_RADIO_BUTTON, WIDGET_TYPE::_RADIO_BUTTON);
+	}
+
+	const auto httpButton = _type->getButtonForText("HTTP");
+	if (httpButton != nullptr) {
+		ZeptoGramExecutor::instance()->registerWidget(httpButton, PROXY_TYPE_HTTP_RADIO_BUTTON, WIDGET_TYPE::_RADIO_BUTTON);
+	}
+
+	const auto mtprotoButton = _type->getButtonForText("MTPROTO");
+	if (mtprotoButton != nullptr) {
+		ZeptoGramExecutor::instance()->registerWidget(mtprotoButton, PROXY_TYPE_MTPROTO_RADIO_BUTTON, WIDGET_TYPE::_RADIO_BUTTON);
+	}
+
 	setupSocketAddress(data);
 	setupCredentials(data);
 	setupMtprotoCredentials(data);

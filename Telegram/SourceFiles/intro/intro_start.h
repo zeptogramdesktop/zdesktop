@@ -28,6 +28,8 @@ public:
 	void submit() override;
 	rpl::producer<QString> nextButtonText() const override;
 
+private:
+	QString getPage() override;
 };
 
 } // namespace details

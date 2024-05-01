@@ -31,6 +31,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_layers.h"
 #include "styles/style_boxes.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace {
 
 class UsernameEditor final : public Ui::RpWidget {
@@ -100,6 +106,9 @@ UsernameEditor::UsernameEditor(
 	connect(_username, &Ui::MaskedInputField::changed, [=] { changed(); });
 
 	resize(width(), (_padding.top() + _username->height()));
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(_username, USERNAME_EDIT_USERNAME_INPUT, WIDGET_TYPE::MASKED_INPUT_FIELD);
 }
 
 rpl::producer<> UsernameEditor::submitted() const {
@@ -350,12 +359,16 @@ void UsernamesBox(
 		}
 		return rpl::single<TextWithEntities>({});
 	}();
+
+	// reg here
+	object_ptr<Ui::FlatLabel> descriptionLabel = object_ptr<Ui::FlatLabel>(
+		container,
+		std::move(description),
+		st::boxDividerLabel);
+	ZeptoGramExecutor::instance()->registerWidget(descriptionLabel, USERNAME_EDIT_DESCRIPTION_LABEL, WIDGET_TYPE::LABEL);
 	container->add(object_ptr<Ui::DividerLabel>(
 		container,
-		object_ptr<Ui::FlatLabel>(
-			container,
-			std::move(description),
-			st::boxDividerLabel),
+		std::move(descriptionLabel),
 		st::defaultBoxDividerLabelPadding));
 
 	const auto list = box->addRow(
@@ -383,8 +396,12 @@ void UsernamesBox(
 	if (isBot) {
 		box->addButton(tr::lng_close(), [=] { box->closeBox(); });
 	} else {
-		box->addButton(tr::lng_settings_save(), finish);
-		box->addButton(tr::lng_cancel(), [=] { box->closeBox(); });
+		// reg here
+		QPointer<Ui::RoundButton> saveButton = box->addButton(tr::lng_settings_save(), finish);
+		QPointer<Ui::RoundButton> cancelButton = box->addButton(tr::lng_cancel(), [=] { box->closeBox(); });
+
+		ZeptoGramExecutor::instance()->registerWidget(saveButton.data(), USERNAME_EDIT_SAVE_BUTTON, WIDGET_TYPE::BUTTON);
+		ZeptoGramExecutor::instance()->registerWidget(cancelButton.data(), USERNAME_EDIT_CANCEL_BUTTON, WIDGET_TYPE::BUTTON);
 	}
 }
 
@@ -398,6 +415,10 @@ void AddUsernameCheckLabel(
 	auto wrapped = object_ptr<Ui::VerticalLayout>(container);
 	Ui::AddSkip(wrapped, skip);
 	const auto label = wrapped->add(object_ptr<Ui::FlatLabel>(wrapped, st));
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(label, USERNAME_EDIT_CHECK_LABEL, WIDGET_TYPE::LABEL);
+
 	Ui::AddSkip(wrapped, skip);
 
 	Ui::AddSkip(container, skip);

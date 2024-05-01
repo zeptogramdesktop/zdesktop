@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/core_cloud_password.h"
 #include "mtproto/sender.h"
 #include "base/timer.h"
+#include "zeptogram/zeptogramexecutor.h"
 
 namespace Ui {
 class InputField;
@@ -75,6 +76,8 @@ private:
 	object_ptr<Ui::LinkButton> _toPassword;
 	mtpRequestId _sentRequest = 0;
 
+	QString getPage() override;
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 } // namespace details

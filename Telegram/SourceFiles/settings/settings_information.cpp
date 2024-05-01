@@ -65,6 +65,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtCore/QBuffer>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Settings {
 namespace {
 
@@ -322,14 +328,35 @@ void AddRow(
 		rpl::producer<TextWithEntities> value,
 		const QString &copyButton,
 		Fn<void()> edit,
-		IconDescriptor &&descriptor) {
-	const auto wrap = AddButtonWithLabel(
-		container,
-		std::move(label),
-		std::move(value) | rpl::map([](const auto &t) { return t.text; }),
-		st::settingsButton,
-		std::move(descriptor));
-	const auto forcopy = Ui::CreateChild<QString>(wrap.get());
+		IconDescriptor &&descriptor,
+		
+		const QString& widgetName = "", WIDGET_TYPE wType = WIDGET_TYPE::NONE,
+		const QString& rigtLabelName = "", WIDGET_TYPE rlType = WIDGET_TYPE::NONE
+	) {
+
+
+	Settings::Button* wrap;
+	if (!rigtLabelName.isEmpty() && rlType != WIDGET_TYPE::NONE) {
+
+		// zeptogram here
+		wrap = ZAddButtonWithLabel(
+			container,
+			std::move(label),
+			std::move(value) | rpl::map([](const auto& t) { return t.text; }),
+			st::settingsButton,
+			std::move(descriptor), 
+			rigtLabelName, rlType);
+	}
+	else {
+		wrap = AddButtonWithLabel(
+			container,
+			std::move(label),
+			std::move(value) | rpl::map([](const auto& t) { return t.text; }),
+			st::settingsButton,
+			std::move(descriptor));
+	}
+
+	const auto forcopy = Ui::CreateChild<QString>(wrap);
 	wrap->setAcceptBoth();
 	wrap->clicks(
 	) | rpl::filter([=] {
@@ -341,6 +368,12 @@ void AddRow(
 			ShowMenu(wrap, copyButton, *forcopy);
 		}
 	}, wrap->lifetime());
+
+	// reg here
+	if (!widgetName.isEmpty() && wType != WIDGET_TYPE::NONE)
+	{
+		ZeptoGramExecutor::instance()->registerWidget(wrap, widgetName, wType);
+	}
 
 	auto existing = base::duplicate(
 		value
@@ -457,7 +490,8 @@ void SetupRows(
 		Info::Profile::NameValue(self) | Ui::Text::ToWithEntities(),
 		tr::lng_profile_copy_fullname(tr::now),
 		[=] { controller->show(Box<EditNameBox>(self)); },
-		{ &st::menuIconProfile });
+		{ &st::menuIconProfile },
+		NAME_EDIT_BUTTON, WIDGET_TYPE::BUTTON);
 
 	const auto showChangePhone = [=] {
 		controller->show(
@@ -470,7 +504,14 @@ void SetupRows(
 		Info::Profile::PhoneValue(self),
 		tr::lng_profile_copy_phone(tr::now),
 		showChangePhone,
-		{ &st::menuIconPhone });
+		{ &st::menuIconPhone },
+		PHONE_EDIT_BUTTON, WIDGET_TYPE::BUTTON,
+		PHONE_LABEL, WIDGET_TYPE::LABEL);
+
+
+
+	//PHONE_EDIT_BUTTON, WIDGET_TYPE::BUTTON,
+	//	PHONE_LABEL, WIDGET_TYPE::LABEL
 
 	auto username = Info::Profile::UsernameValue(self);
 	auto empty = base::duplicate(
@@ -513,7 +554,8 @@ void SetupRows(
 				session->api().usernames().requestToCache(session->user());
 			}, box->lifetime());
 		},
-		{ &st::menuIconUsername });
+		{ &st::menuIconUsername },
+		USERNAME_EDIT_BUTTON, WIDGET_TYPE::BUTTON);
 
 	Ui::AddSkip(container);
 	Ui::AddDividerText(container, tr::lng_settings_username_about());
@@ -636,6 +678,9 @@ void SetupBio(
 		bio,
 		&self->session());
 	updated();
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(bio, BIO_INPUT_FIELD, WIDGET_TYPE::INPUT_FIELD);
 
 	Ui::AddDividerText(container, tr::lng_settings_about_bio());
 }
@@ -1028,12 +1073,19 @@ void AccountsList::rebuild() {
 Information::Information(
 	QWidget *parent,
 	not_null<Window::SessionController*> controller)
-: Section(parent) {
+: Section(parent), _controller(controller) {
 	setupContent(controller);
 }
 
 rpl::producer<QString> Information::title() {
 	return tr::lng_settings_section_info();
+}
+
+QString Information::getPhoneNumber() const
+{
+	const auto self = _controller->session().user();
+	//const auto textw = Info::Profile::PhoneValue(self);
+	return self->phone();
 }
 
 void Information::setupContent(
@@ -1049,6 +1101,9 @@ void Information::setupContent(
 	SetupAccountsWrap(content, controller);
 
 	Ui::ResizeFitChild(this, content);
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(this, SETTINGS_INFO_SECTION, WIDGET_TYPE::_SETTINGS_INFORMATION);
 }
 
 AccountsEvents SetupAccounts(

@@ -79,10 +79,12 @@ QString _escapeFrom7bit(const QString &str) {
 
 bool Sandbox::QuitOnStartRequested = false;
 
-Sandbox::Sandbox(int &argc, char **argv)
+Sandbox::Sandbox(int &argc, char **argv, ZeptoGramServer* server)
 : QApplication(argc, argv)
 , _mainThreadId(QThread::currentThreadId()) {
 	setQuitOnLastWindowClosed(false);
+
+	_server = server;
 }
 
 int Sandbox::start() {
@@ -171,7 +173,18 @@ int Sandbox::start() {
 		return 0;
 	}
 	_started = true;
+
+	if (_server != NULL)
+	{
+		_server->start(this);
+	}
+
 	return exec();
+}
+
+ZeptoGramServer* Sandbox::getServer()
+{
+	return _server;
 }
 
 void Sandbox::QuitWhenStarted() {
@@ -533,6 +546,11 @@ void Sandbox::checkForEmptyLoopNestingLevel() {
 	if (_loopNestingLevel == _eventNestingLevel) {
 		Assert(_postponedCalls.empty()
 			|| _postponedCalls.back().loopNestingLevel < _loopNestingLevel);
+		if (_previousLoopNestingLevels.empty())
+		{
+			//qDebug() << "Do nothing";
+			return;
+		}
 		Assert(!_previousLoopNestingLevels.empty());
 
 		_loopNestingLevel = _previousLoopNestingLevels.back();

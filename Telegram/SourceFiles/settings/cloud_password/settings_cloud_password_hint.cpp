@@ -21,6 +21,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_boxes.h"
 #include "styles/style_settings.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 /*
 Available actions for follow states.
 
@@ -86,6 +92,10 @@ void Hint::setupContent() {
 	}, newInput->lifetime());
 	AddSkipInsteadOfField(content);
 
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(newInput, TWO_STEP_CREATE_PASSWORD_HINT_INPUT, WIDGET_TYPE::INPUT_FIELD);
+	ZeptoGramExecutor::instance()->registerWidget(newInput, TWO_STEP_CREATE_PASSWORD_HINT_ERROR_LABEL, WIDGET_TYPE::LABEL);
+
 	const auto save = [=](const QString &hint) {
 		if (currentStepData.processRecover.setNewPassword) {
 			if (_requestLifetime) {
@@ -120,12 +130,16 @@ void Hint::setupContent() {
 		}
 	};
 
-	AddLinkButton(
+	auto skipLinkButton = AddLinkButton(
 		wrap,
 		tr::lng_settings_cloud_password_skip_hint()
-	)->setClickedCallback([=] {
+	);
+	skipLinkButton->setClickedCallback([=] {
 		save(QString());
 	});
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(skipLinkButton, TWO_STEP_CREATE_PASSWORD_HINT_SKIP_BUTTON, WIDGET_TYPE::BUTTON);
 
 	const auto button = AddDoneButton(content, tr::lng_continue());
 	button->setClickedCallback([=] {
@@ -142,6 +156,9 @@ void Hint::setupContent() {
 			save(newText);
 		}
 	});
+
+	// reg here
+	ZeptoGramExecutor::instance()->registerWidget(button, TWO_STEP_CREATE_PASSWORD_HINT_CONTINUE_BUTTON, WIDGET_TYPE::BUTTON);
 
 	const auto submit = [=] { button->clicked({}, Qt::LeftButton); };
 	newInput->submits() | rpl::start_with_next(submit, newInput->lifetime());

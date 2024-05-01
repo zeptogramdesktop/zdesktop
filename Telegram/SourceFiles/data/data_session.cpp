@@ -2562,6 +2562,42 @@ bool Session::suggestToGigagroup(not_null<ChannelData*> group) const {
 	return _suggestToGigagroup.contains(group);
 }
 
+QList<QPair<MsgId, HistoryItem*>> Session::getMessagesForPeer(PeerId peerId)
+{
+	// result map
+	//std::unordered_map<MsgId, not_null<HistoryItem*>> res;
+	QList<QPair<MsgId, HistoryItem*>> res;
+	if (!peerId.value)
+	{
+		return res;
+	}
+	
+	const Session::Messages* mess = messagesList(peerId);
+	if (!mess)
+	{
+		return res;
+	}
+
+	for (auto it = mess->begin(); it != mess->end(); ++it)
+	{
+		const MsgId msgId = it->first;
+		HistoryItem* hItem = it->second;
+		
+		QPair<MsgId, HistoryItem*> pair;
+		pair.first = msgId;
+		pair.second = hItem;
+		res.append(pair);
+		//res.insert(std::make_pair(msgId, hItem));
+	}
+
+	// reverse sorting
+	std::sort(res.begin(), res.end(), [](const QPair<MsgId, HistoryItem*>& p1, const QPair<MsgId, HistoryItem*>& p2) {
+		return (p1.first.bare > p2.first.bare);
+	});
+
+	return res;
+}
+
 HistoryItem *Session::message(PeerId peerId, MsgId itemId) const {
 	if (!itemId) {
 		return nullptr;

@@ -641,6 +641,25 @@ ReplyKeyboard::Button &ReplyKeyboard::Button::operator=(
 	Button &&other) = default;
 ReplyKeyboard::Button::~Button() = default;
 
+std::vector<ReplyKeyboard::ZButtonList> ReplyKeyboard::getRowButtons()
+{
+	std::vector<ReplyKeyboard::ZButtonList> res;
+
+	for (int i = 0, rows = _rows.size(); i != rows; ++i) {
+		auto& row = _rows[i];
+		ZButtonList zrow;
+
+		for (int j = 0, cols = row.size(); j != cols; ++j) {
+			ReplyKeyboard::ZButton zb;
+			zb.link = row[j].link;
+			zb.text = row[j].text.toString();
+			zrow.row.push_back(zb);
+		}
+		res.push_back(zrow);
+	}
+	return res;
+}
+
 ReplyKeyboard::ReplyKeyboard(
 	not_null<const HistoryItem*> item,
 	std::unique_ptr<Style> &&s)

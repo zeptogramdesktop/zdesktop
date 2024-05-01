@@ -49,6 +49,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtGui/QWindow>
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
+
 namespace {
 
 // Code for testing languages is F7-F6-F7-F8
@@ -103,6 +109,9 @@ MainWindow::MainWindow(not_null<Window::Controller*> controller)
 	}, lifetime());
 
 	setAttribute(Qt::WA_OpaquePaintEvent);
+
+	// connect scenarios
+	QObject::connect(this, &MainWindow::mainMenuOpened, _scService, &ScenarioService::mainMenuOpened);
 }
 
 void MainWindow::initHook() {
@@ -339,6 +348,8 @@ void MainWindow::showMainMenu() {
 	_layer->showMainMenu(
 		object_ptr<Window::MainMenu>(body(), sessionController()),
 		anim::type::normal);
+
+	_state->setMainMenuOpened(true);
 }
 
 void MainWindow::ensureLayerCreated() {
@@ -348,6 +359,14 @@ void MainWindow::ensureLayerCreated() {
 	_layer = base::make_unique_q<Ui::LayerStackWidget>(
 		bodyWidget(),
 		crl::guard(this, [=] { return controller().uiShow(); }));
+	_executor->registerWidget(_layer, MAIN_LAYER_WIDGET, _LAYER_WIDGET);
+	
+	_layer->setMenuOpenedCallback([=] {
+		_state->setMainMenuOpened(true);
+	});
+	_layer->setMenuClosedCallback([=] {
+		_state->setMainMenuOpened(false);
+	});
 
 	_layer->hideFinishEvents(
 	) | rpl::filter([=] {

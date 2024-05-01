@@ -14,6 +14,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/unread_badge.h"
 #include "ui/layers/layer_widget.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace Ui {
 class IconButton;
 class FlatLabel;
@@ -101,6 +103,7 @@ private:
 
 	rpl::variable<bool> _showFinished = false;
 
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 struct OthersUnreadState {

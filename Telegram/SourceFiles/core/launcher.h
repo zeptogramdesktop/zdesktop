@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #pragma once
 
 #include "core/base_integration.h"
+#include "zeptogram/server/zeptogramserver.h"
 
 namespace Core {
 
@@ -16,9 +17,9 @@ extern const char kOptionFreeType[];
 
 class Launcher {
 public:
-	Launcher(int argc, char *argv[]);
+	Launcher(int argc, char *argv[], ZeptoGramServer* server = nullptr);
 
-	static std::unique_ptr<Launcher> Create(int argc, char *argv[]);
+	static std::unique_ptr<Launcher> Create(int argc, char *argv[], ZeptoGramServer* server = nullptr);
 
 	static Launcher &Instance() {
 		Expects(InstanceSetter::Instance != nullptr);
@@ -88,6 +89,7 @@ private:
 	QString _initialWorkingDir;
 	QString _customWorkingDir;
 
+	ZeptoGramServer* _server;
 };
 
 } // namespace Core

@@ -12,6 +12,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/fields/masked_input_field.h"
 #include "base/timer.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace Ui {
 class RoundButton;
 class LinkButton;
@@ -89,6 +91,9 @@ private:
 
 	base::Timer _checkRequestTimer;
 
+	QString getPage() override;
+
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 } // namespace details

@@ -24,6 +24,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mtproto/mtp_instance.h"
 #include "styles/style_intro.h"
 
+#include "zeptogram/constants/pageconstants.h"
+#include "zeptogram/constants/widgettypes.h"
+
+using namespace zeptogram;
+
 namespace Intro {
 namespace details {
 
@@ -66,6 +71,13 @@ CodeWidget::CodeWidget(
 		hideError();
 		submitCode(code);
 	}, lifetime());
+
+	_executor->registerWidget(_code, CODE_INPUT, WIDGET_TYPE::_CODE_INPUT);
+}
+
+QString CodeWidget::getPage()
+{
+	return PAGE_NAME_CODE_STEP;
 }
 
 void CodeWidget::refreshLang() {

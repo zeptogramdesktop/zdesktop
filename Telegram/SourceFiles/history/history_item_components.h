@@ -507,6 +507,18 @@ public:
 	void clearSelection();
 	void updateMessageId();
 
+	struct ZButton {
+		QString text;
+		std::shared_ptr<ReplyMarkupClickHandler> link;
+	};
+	
+	struct ZButtonList {
+		std::vector<ZButton> row;
+	};
+
+	// zeptogram here
+	std::vector<ZButtonList> getRowButtons();
+
 private:
 	friend class Style;
 	struct Button {

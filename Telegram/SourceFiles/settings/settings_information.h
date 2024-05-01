@@ -29,9 +29,12 @@ public:
 
 	[[nodiscard]] rpl::producer<QString> title() override;
 
+	QString getPhoneNumber() const;
+
 private:
 	void setupContent(not_null<Window::SessionController*> controller);
 
+	not_null<Window::SessionController*> _controller;
 };
 
 struct AccountsEvents {

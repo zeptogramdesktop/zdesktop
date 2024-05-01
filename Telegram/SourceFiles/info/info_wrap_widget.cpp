@@ -50,6 +50,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_menu_icons.h"
 #include "styles/style_layers.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/state/zeptogramstate.h"
+#include "zeptogram/constants/pageconstants.h"
+#include "zeptogram/constants/widgettypes.h"
+
+using namespace zeptogram;
+
 namespace Info {
 namespace {
 
@@ -339,6 +346,10 @@ void WrapWidget::createTopBar() {
 		close->addClickHandler([this] {
 			_controller->parentController()->closeThirdSection();
 		});
+
+		// reg here
+		ZeptoGramExecutor::instance()->registerWidget(close, CLOSE_SIDE_X_BUTTON, WIDGET_TYPE::BUTTON);
+		ZeptoGramState::instance()->setChatSidePanelOpened(true);
 	}
 	_topBar->storyClicks() | rpl::start_with_next([=] {
 		if (const auto peer = _controller->key().peer()) {
@@ -355,6 +366,9 @@ void WrapWidget::createTopBar() {
 				_controller->parentController()->hideSpecialLayer();
 			});
 		});
+
+		// reg here
+		ZeptoGramExecutor::instance()->registerWidget(close, CLOSE_DIALOG_X_BUTTON, WIDGET_TYPE::BUTTON);
 	} else if (requireTopBarSearch()) {
 		auto search = _controller->searchFieldController();
 		Assert(search != nullptr);

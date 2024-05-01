@@ -67,6 +67,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QClipboard>
 #include <QtGui/QWindow>
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Settings {
 namespace {
 
@@ -308,18 +314,26 @@ void SetupSections(
 	Ui::AddDivider(container);
 	Ui::AddSkip(container);
 
+	ZeptoGramExecutor* _exec = ZeptoGramExecutor::instance();
+
 	const auto addSection = [&](
 			rpl::producer<QString> label,
 			Type type,
-			IconDescriptor &&descriptor) {
-		AddButtonWithIcon(
-			container,
-			std::move(label),
-			st::settingsButton,
-			std::move(descriptor)
-		)->addClickHandler([=] {
+			IconDescriptor &&descriptor, const QString& buttonName = "", 
+			WIDGET_TYPE wType = WIDGET_TYPE::NONE) {
+		auto btn = AddButtonWithIcon(
+				container,
+				std::move(label),
+				st::settingsButton,
+				std::move(descriptor)
+			);
+		btn->addClickHandler([=] {
 			showOther(type);
 		});
+
+		if (!buttonName.isEmpty() and wType != WIDGET_TYPE::NONE) {
+			_exec->registerWidget(btn, buttonName, wType);
+		}
 	};
 	if (controller->session().supportMode()) {
 		SetupSupport(controller, container);
@@ -327,20 +341,28 @@ void SetupSections(
 		Ui::AddDivider(container);
 		Ui::AddSkip(container);
 	} else {
+		// register account info button
 		addSection(
 			tr::lng_settings_my_account(),
 			Information::Id(),
-			{ &st::menuIconProfile });
+			{ &st::menuIconProfile },
+			ACCOUNT_INFO_BUTTON,
+			WIDGET_TYPE::BUTTON);
 	}
 
 	addSection(
 		tr::lng_settings_section_notify(),
 		Notifications::Id(),
 		{ &st::menuIconNotifications });
+
+	// register privacy and security button
 	addSection(
 		tr::lng_settings_section_privacy(),
 		PrivacySecurity::Id(),
-		{ &st::menuIconLock });
+		{ &st::menuIconLock },
+		PRIVACY_SEC_BUTTON,
+		WIDGET_TYPE::BUTTON);
+
 	addSection(
 		tr::lng_settings_section_chat_settings(),
 		Chat::Id(),
@@ -392,7 +414,9 @@ void SetupSections(
 	addSection(
 		tr::lng_settings_advanced(),
 		Advanced::Id(),
-		{ &st::menuIconManage });
+		{ &st::menuIconManage },
+		ADVANCED_BUTTON, WIDGET_TYPE::BUTTON);
+
 	addSection(
 		tr::lng_settings_section_devices(),
 		Calls::Id(),

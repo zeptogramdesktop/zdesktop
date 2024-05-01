@@ -82,6 +82,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QTextEdit>
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Dialogs {
 namespace {
 
@@ -377,6 +382,7 @@ Widget::Widget(
 			checkUpdateStatus();
 		}, lifetime());
 	}
+	_executor->registerWidget(_filter, MAIN_SEARCH_INPUT, WIDGET_TYPE::INPUT_FIELD);
 
 	_cancelSearch->setClickedCallback([this] { cancelSearch(); });
 	_jumpToDate->entity()->setClickedCallback([this] { showCalendar(); });
@@ -498,6 +504,8 @@ Widget::Widget(
 		setupMoreChatsBar();
 		setupDownloadBar();
 	}
+
+	_executor->registerWidget(_inner, DIALOGS_WIDGET, WIDGET_TYPE::_DIALOGS_WIDGET);
 }
 
 void Widget::chosenRow(const ChosenRow &row) {
@@ -799,6 +807,9 @@ void Widget::setupMainMenuToggle() {
 	});
 	_mainMenu.under->stackUnder(_mainMenu.toggle);
 	_mainMenu.toggle->setClickedCallback([=] { showMainMenu(); });
+
+	auto mainMenuBtn = _mainMenu.under.data();
+	_executor->registerWidget(mainMenuBtn, MAIN_MENU_BUTTON, WIDGET_TYPE::BUTTON);
 
 	rpl::single(rpl::empty) | rpl::then(
 		controller()->filtersMenuChanged()

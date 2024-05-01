@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "ui/layers/layer_widget.h"
 
+
 namespace Ui {
 class VerticalLayout;
 class FadeShadow;
@@ -49,7 +50,6 @@ private:
 	bool _inResize = false;
 	bool _tillTop = false;
 	bool _tillBottom = false;
-
 };
 
 } // namespace Settings

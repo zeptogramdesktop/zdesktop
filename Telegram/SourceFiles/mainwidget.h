@@ -12,6 +12,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "media/player/media_player_float.h"
 #include "mtproto/sender.h"
 
+#include "zeptogram/main/pageable.h"
+#include "zeptogram/zeptogramexecutor.h"
+
 struct HistoryMessageMarkupButton;
 class MainWindow;
 class HistoryWidget;
@@ -110,6 +113,7 @@ class ItemBase;
 
 class MainWidget
 	: public Ui::RpWidget
+	, public Pageable
 	, private Media::Player::FloatDelegate {
 public:
 	using SectionShow = Window::SectionShow;
@@ -386,4 +390,5 @@ private:
 	// _changelogs depends on _data, subscribes on chats loading event.
 	const std::unique_ptr<Core::Changelogs> _changelogs;
 
+	QString getPage() override;
 };

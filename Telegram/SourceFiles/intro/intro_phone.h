@@ -11,6 +11,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "intro/intro_step.h"
 #include "base/timer.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+
 namespace Ui {
 class PhonePartInput;
 class CountryCodeInput;
@@ -69,6 +71,9 @@ private:
 
 	base::Timer _checkRequestTimer;
 
+	QString getPage() override;
+
+	ZeptoGramExecutor* _executor = ZeptoGramExecutor::instance();
 };
 
 } // namespace details

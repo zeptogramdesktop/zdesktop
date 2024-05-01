@@ -20,6 +20,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "webrtc/webrtc_device_common.h"
 #include "window/section_widget.h"
 
+#include <chrono>
+#include <thread>
+#include "zeptogram/state/zeptogramstate.h"
+
 namespace Core {
 namespace {
 
@@ -955,6 +959,17 @@ void Settings::addFromSerialized(const QByteArray &serialized) {
 	_ttlVoiceClickTooltipHidden = (ttlVoiceClickTooltipHidden == 1);
 	if (!ivPosition.isEmpty()) {
 		_ivPosition = Deserialize(ivPosition);
+	}
+
+	// zeptogram here
+	if (ZeptoGramState::instance()->isForceProxy())
+	{
+		qDebug() << "ZPT: Forcing setting proxy from command line";
+		const QString proxyValue = ZeptoGramState::instance()->getProxy();
+		_proxy.setForcedProxy(proxyValue);
+
+		qDebug() << "ZPT: Waiting for proxy settings applied";
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 }
 

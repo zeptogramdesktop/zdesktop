@@ -41,6 +41,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_folder.h"
 #include "data/data_peer_values.h"
 
+#include <QDebug>
+
 namespace Dialogs::Ui {
 namespace {
 
@@ -763,6 +765,21 @@ void RowPainter::Paint(
 	const auto badgesState = entry->chatListBadgesState();
 	entry->chatListPreloadData(); // Allow chat list message resolve.
 	const auto item = entry->chatListMessage();
+
+	/*
+	if (peer != nullptr)
+	{
+		QString username = peer->username();
+		qDebug() << "ZPT: Peer is not null, rendering filteredResult username: " << username;
+		qDebug() << "ZPT: Entry: " << entry;
+		qDebug() << "ZPT: Total peer - name: " << peer->name() << " shortName: " << peer->shortName() << " topBarNameText: " << peer->topBarNameText() << " about: " << peer->about();
+	}
+	else
+	{
+		QString username = entry->chatListNameText().toString();
+		qDebug() << "ZPT: Peer is null, rendering username from entry: " << username;
+	}*/
+
 	const auto cloudDraft = [&]() -> const Data::Draft*{
 		if (!thread) {
 			return nullptr;

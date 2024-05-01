@@ -74,6 +74,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Window {
 namespace {
 
@@ -699,8 +704,8 @@ MainMenu::MainMenu(
 	parentResized();
 
 	_telegram->setMarkedText(Ui::Text::Link(
-		u"Telegram Desktop"_q,
-		u"https://desktop.telegram.org"_q));
+		u"Zeptogram Desktop"_q,
+		u"https://github.com/zeptogramdesktop/zdesktop"_q));
 	_telegram->setLinksTrusted();
 	_version->setMarkedText(
 		Ui::Text::Link(
@@ -1042,12 +1047,17 @@ void MainMenu::setupMenu() {
 		)->setClickedCallback([=] {
 			ShowCallsBox(controller);
 		});
-		addAction(
+		
+		// reg here
+		auto savedMessagesBtn = addAction(
 			tr::lng_saved_messages(),
 			{ &st::menuIconSavedMessages }
-		)->setClickedCallback([=] {
+		);
+		savedMessagesBtn->setClickedCallback([=] {
 			controller->showPeerHistory(controller->session().user());
 		});
+		_executor->registerWidget(savedMessagesBtn, MAIN_MENU_SAVED_MESSAGES_BUTTON, WIDGET_TYPE::BUTTON);
+
 	} else {
 		addAction(
 			tr::lng_profile_add_contact(),
@@ -1072,12 +1082,16 @@ void MainMenu::setupMenu() {
 			_controller->session().supportTemplates().reload();
 		});
 	}
-	addAction(
+
+	// reg here
+	auto settingsBtn = addAction(
 		tr::lng_menu_settings(),
 		{ &st::menuIconSettings }
-	)->setClickedCallback([=] {
+	); 
+	settingsBtn->setClickedCallback([=] {
 		controller->showSettings();
 	});
+	_executor->registerWidget(settingsBtn, MAIN_MENU_SETTINGS_BUTTON, WIDGET_TYPE::BUTTON);
 
 	_nightThemeToggle = addAction(
 		tr::lng_menu_night_mode(),

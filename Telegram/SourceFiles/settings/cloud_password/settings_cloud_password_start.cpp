@@ -15,6 +15,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/wrap/vertical_layout.h"
 #include "styles/style_settings.h"
 
+#include "zeptogram/zeptogramexecutor.h"
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
+
 namespace Settings {
 namespace CloudPassword {
 
@@ -47,12 +54,15 @@ void Start::setupContent() {
 	AddSkipInsteadOfField(content);
 	AddSkipInsteadOfError(content);
 
-	AddDoneButton(
+	
+	auto btn = AddDoneButton(
 		content,
 		tr::lng_settings_cloud_password_password_subtitle()
-	)->setClickedCallback([=] {
+	);
+	btn->setClickedCallback([=] {
 		showOther(CloudPasswordInputId());
 	});
+	ZeptoGramExecutor::instance()->registerWidget(btn, TWO_STEP_CREATE_PASSWORD_INTRO_BUTTON, WIDGET_TYPE::BUTTON);
 
 	Ui::ResizeFitChild(this, content);
 }

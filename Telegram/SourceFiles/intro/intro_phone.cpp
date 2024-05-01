@@ -28,6 +28,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_session_controller.h"
 #include "countries/countries_instance.h" // Countries::Groups
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Intro {
 namespace details {
 namespace {
@@ -96,6 +101,15 @@ PhoneWidget::PhoneWidget(
 		_country->chooseCountry(u"US"_q);
 	}
 	_changed = false;
+
+	_executor->registerWidget(_country, COUNTRY_INPUT, _COUNTRY_INPUT);
+	_executor->registerWidget(_code, PHONE_CODE_INPUT, MASKED_INPUT_FIELD);
+	_executor->registerWidget(_phone, PHONE_NUMBER_INPUT, MASKED_INPUT_FIELD);
+}
+
+QString PhoneWidget::getPage()
+{
+	return PAGE_NAME_PHONE_STEP;
 }
 
 void PhoneWidget::setupQrLogin() {
@@ -118,6 +132,8 @@ void PhoneWidget::setupQrLogin() {
 	qrLogin->setClickedCallback([=] {
 		goReplace<QrWidget>(Animate::Forward);
 	});
+
+	_executor->registerWidget(qrLogin, LOGIN_QR_BUTTON, WIDGET_TYPE::BUTTON);
 }
 
 void PhoneWidget::resizeEvent(QResizeEvent *e) {

@@ -46,6 +46,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_intro.h"
 #include "base/qt/qt_common_adapters.h"
 
+#include "zeptogram/constants/widgettypes.h"
+#include "zeptogram/constants/pageconstants.h"
+
+using namespace zeptogram;
+
 namespace Intro {
 namespace {
 
@@ -126,8 +131,11 @@ Widget::Widget(
 		handleUpdates(updates);
 	}, lifetime());
 
+	_executor->registerWidget(_back->entity(), BACK_BUTTON, WIDGET_TYPE::BUTTON);
 	_back->entity()->setClickedCallback([=] { backRequested(); });
 	_back->hide(anim::type::instant);
+
+	_executor->registerWidget(_settings->entity(), SETTINGS_BUTTON, WIDGET_TYPE::BUTTON);
 
 	if (_changeLanguage) {
 		_changeLanguage->finishAnimating();
@@ -157,6 +165,8 @@ Widget::Widget(
 			checkUpdateStatus();
 		}, lifetime());
 	}
+
+	_executor->registerPageable(UiDelegate("INTRO_PAGE", this));
 }
 
 rpl::producer<> Widget::showSettingsRequested() const {
@@ -261,6 +271,8 @@ void Widget::createLanguageLink() {
 		_changeLanguage->entity()->setClickedCallback([=] {
 			Lang::CurrentCloudManager().switchToLanguage(languageId);
 		});
+
+		_executor->registerWidget(_changeLanguage->entity(), CHANGE_LANGUAGE_BUTTON, WIDGET_TYPE::BUTTON);
 		_changeLanguage->toggle(
 			!_resetAccount && !_terms && _nextShown,
 			anim::type::normal);
@@ -688,6 +700,8 @@ void Widget::showControls() {
 }
 
 void Widget::setupNextButton() {
+	_executor->registerWidget(_next->entity(), NEXT_BUTTON, WIDGET_TYPE::BUTTON);
+
 	_next->entity()->setClickedCallback([=] { getStep()->submit(); });
 	_next->entity()->setTextTransform(
 		Ui::RoundButton::TextTransform::NoTransform);
