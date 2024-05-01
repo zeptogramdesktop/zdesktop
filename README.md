@@ -10,7 +10,7 @@
 
 ## Usecase
 
-The most valuable usecase is when you need to automate some operations with your account(s) and don't want to manually login by code into account:
+The most valuable usecase is when you need to automate some operations with your account(s) already authorized in Telegram Desktop and don't want to manually login by code into account via API:
 
 - Run Zeptigram client with an existing tdata folder
 - Run Selenium scripts to open [web telegram](https://web.telegram.org/k/) in a browser
@@ -19,7 +19,7 @@ The most valuable usecase is when you need to automate some operations with your
 - Continue operations in web version having saved local storage session in a browser (it means you can restart your browser and continue operations without re-authoring again)
 
 Why not use official API?
-You still need to manually enter 2FA code when first authorizing using official API. Zeptogram client provides API to read the 2FA code
+You still need to manually enter 2FA code when authorizing using official API at first. Zeptogram client provides API to read the 2FA code
 
 ### Libraries used
 
