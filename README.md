@@ -1,8 +1,13 @@
-# [Zeptogram Desktop] - First Telegram Desktop version with REST API to control UI Elements
+# Zeptogram Desktop - First Telegram Desktop version with REST API to control UI Elements
 
+## Features
 
+- REST API server built in Telegram
+- UI elements have ids
+- pywinauto support
+- Mouse and Keyboard free while interacting through REST API - it means you can minimize Zeptogram window while your control script is running
 
-## Build instructions
+## Build instructions (same as for official client)
 
 * Windows [(32-bit)][win32] [(64-bit)][win64]
 * [macOS][mac]
