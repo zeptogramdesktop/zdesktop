@@ -3,9 +3,23 @@
 ## Features
 
 - REST API server built in Telegram
+- [python API client](https://github.com/zeptogramdesktop/zeptogramapi)
 - UI elements have ids
 - pywinauto support
 - Mouse and Keyboard free while interacting through REST API - it means you can minimize Zeptogram window while your control script is running
+
+## Usecase
+
+The most valuable usecase is when you need to automate some operations with your account(s) and don't want to manually login by code into account:
+
+- Run Zeptigram client with an existing tdata folder
+- Run Selenium scripts to open [web telegram](https://web.telegram.org/k/) in a browser
+- Login via Selenium scripts
+- Receive 2FA code for login and get it from Zeptogram API
+- Continue operations in web version having saved local storage session in a browser (it means you can restart your browser and continue operations without re-authoring again)
+
+Why not use official API?
+You still need to manually enter 2FA code when first authorizing using official API. Zeptogram client provides API to read the 2FA code
 
 ### Libraries used
 
